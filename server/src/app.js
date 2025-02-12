@@ -1,13 +1,30 @@
 const express = require('express');
-const app = express();
-const port = 3000;
+const config = require('./config/config');
+const { Pool } = require('pg');
+const jwt = require('jsonwebtoken');
 
-app.get('/', (req, res) => {
-   res.send('Hello World!');
+const app = express();
+
+// Database connection
+const pool = new Pool({
+  host: config.db.host,
+  port: config.db.port,
+  user: config.db.user,
+  password: config.db.password,
+  database: config.db.database,
 });
 
-app.listen(port, () => {
-   console.log(`Example app listening on port ${port}`);
+pool.connect()
+  .then(() => console.log('Connected to the database'))
+  .catch(err => console.error('Database connection error', err));
+
+// JWT Token Example
+const token = jwt.sign({ userId: 123 }, config.jwtSecret);
+console.log('Generated Token:', token);
+
+// Start server
+app.listen(config.server.port, () => {
+  console.log(`Server running on port ${config.server.port}`);
 });
 
 // api-project/
