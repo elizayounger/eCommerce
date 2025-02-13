@@ -1,0 +1,678 @@
+openapi: 3.0.1
+info:
+  title: eCommerce API
+  version: 1.0.0
+  description: An e-commerce application REST API
+paths:
+  /:
+    summary: List of items for purchase
+    get:
+      summary: Retrieve the list of products being sold on the site.
+      description: Returns a list of available products, with optional filtering and sorting.
+      operationId: getShopItems
+      parameters:
+        - in: query
+          name: category
+          schema:
+            type: string
+          description: Filter products by category (e.g., "electronics", "clothing").
+        - in: query
+          name: price_min
+          schema:
+            type: number
+          description: Minimum price filter.
+        - in: query
+          name: price_max
+          schema:
+            type: number
+          description: Maximum price filter.
+        - in: query
+          name: sort
+          schema:
+            type: string
+            enum: [price_asc, price_desc, newest]
+          description: Sorting order for products (by price or newest first).
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          description: Number of products to return per request (pagination).
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Page number for paginated results.
+      responses:
+        '200':
+          description: Successfully retrieved the list of products.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      description: Unique product ID.
+                      example: 101
+                    name:
+                      type: string
+                      description: Name of the product.
+                      example: "Wireless Bluetooth Headphones"
+                    category:
+                      type: string
+                      description: Product category.
+                      example: "electronics"
+                    price:
+                      type: number
+                      format: float
+                      description: Price of the product.
+                      example: 59.99
+                    stock:
+                      type: integer
+                      description: Available stock quantity.
+                      example: 25
+                    created_at:
+                      type: string
+                      format: date-time
+                      description: Timestamp when the product was added.
+                      example: "2024-02-13T12:00:00Z"
+        '400':
+          description: Invalid request parameters.
+        '500':
+          description: Internal server error.
+      tags:
+        - shop
+  /register:
+    summary: create user account
+    post:
+      summary: creates user account
+      description: ''
+      operationId: createUserAccount
+      requestBody:
+        description: User registration information
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: The username of the user
+                  example: john_doe
+                email:
+                  type: string
+                  description: The email address of the user
+                  example: john.doe@example.com
+                password:
+                  type: string
+                  description: The password of the user
+                  example: password123
+                confirmPassword:
+                  type: string
+                  description: The confirmation of the password
+                  example: password123
+              required:
+                - username
+                - email
+                - password
+                - confirmPassword
+      responses:
+        '200':
+          description: User account created successfully
+        '400':
+          description: Invalid input data
+        '500':
+          description: Internal server error
+      tags:
+        - register
+  /login:
+    summary: Authenticate user
+    post:
+      summary: Logs in a user
+      description: Authenticates a user and returns a JWT token if credentials are valid.
+      operationId: userLogin
+      requestBody:
+        description: User login credentials
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: The email address of the user
+                  example: john.doe@example.com
+                password:
+                  type: string
+                  format: password
+                  description: The password of the user
+                  example: password123
+              required:
+                - email
+                - password
+      responses:
+        '200':
+          description: Login successful, returns a JWT token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: JWT access token
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        '400':
+          description: Bad request - Missing or invalid parameters
+        '401':
+          description: Unauthorized - Invalid email or password
+        '500':
+          description: Internal server error
+      tags:
+        - login
+  /account:
+    summary: Retrieve user account details
+    get:
+      summary: Get user account details
+      description: Returns details of the authenticated user.
+      operationId: getUserAccount
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successfully retrieved user account details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    description: Full name of the user
+                    example: John Doe
+                  email:
+                    type: string
+                    description: Email address of the user
+                    example: john.doe@example.com
+                  created_at:
+                    type: string
+                    format: date-time
+                    description: Date and time when the account was created
+                    example: '2024-02-13T10:15:30Z'
+        '401':
+          description: Unauthorized - Missing or invalid token
+        '403':
+          description: Forbidden - User is not authorized to access this resource
+        '500':
+          description: Internal server error
+      tags:
+        - account
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+            example: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+          description: JWT token for authentication
+    put:
+      summary: Update user account details
+      description: Allows the authenticated user to update their name or email.
+      operationId: updateUserAccount
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: New full name of the user
+                  example: Jane Doe
+                email:
+                  type: string
+                  description: New email address of the user
+                  example: jane.doe@example.com
+      responses:
+        '200':
+          description: Successfully updated user account details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User details updated successfully
+                  updatedUser:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        example: Jane Doe
+                      email:
+                        type: string
+                        example: jane.doe@example.com
+        '400':
+          description: Bad request - Invalid input
+        '401':
+          description: Unauthorized - Missing or invalid token
+        '403':
+          description: Forbidden - User is not authorized to update this account
+        '500':
+          description: Internal server error
+      tags:
+        - account
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+            example: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+          description: JWT token for authentication
+    delete:
+      summary: Delete user account
+      description: Permanently deletes the authenticated user's account.
+      operationId: deleteUserAccount
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successfully deleted user account
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User account deleted successfully
+        '401':
+          description: Unauthorized - Missing or invalid token
+        '403':
+          description: Forbidden - User is not authorized to delete this account
+        '500':
+          description: Internal server error
+      tags:
+        - account
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+            example: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+          description: JWT token for authentication
+  /cart:
+    summary: Manage the user's shopping cart
+    get:
+      summary: Retrieve the shopping cart
+      description: Returns the current contents of the user's cart.
+      operationId: getCart
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successfully retrieved cart items.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        product_id:
+                          type: integer
+                          description: ID of the product.
+                          example: 101
+                        name:
+                          type: string
+                          description: Name of the product.
+                          example: "Wireless Bluetooth Headphones"
+                        quantity:
+                          type: integer
+                          description: Number of units of this product in the cart.
+                          example: 2
+                        price:
+                          type: number
+                          format: float
+                          description: Price per unit.
+                          example: 59.99
+                        total_price:
+                          type: number
+                          format: float
+                          description: Total price for this item (quantity * price).
+                          example: 119.98
+                  total:
+                    type: number
+                    format: float
+                    description: Total price of all items in the cart.
+                    example: 199.98
+        '401':
+          description: Unauthorized - Missing or invalid token.
+        '500':
+          description: Internal server error.
+      tags:
+        - cart
+    post:
+      summary: Add an item to the cart
+      description: Adds a product to the user's shopping cart.
+      operationId: addToCart
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - product_id
+                - quantity
+              properties:
+                product_id:
+                  type: integer
+                  description: ID of the product to add.
+                  example: 101
+                quantity:
+                  type: integer
+                  description: Number of units to add.
+                  example: 2
+      responses:
+        '201':
+          description: Item successfully added to the cart.
+        '400':
+          description: Bad request - Invalid product ID or quantity.
+        '401':
+          description: Unauthorized - Missing or invalid token.
+        '500':
+          description: Internal server error.
+      tags:
+        - cart
+    put:
+      summary: Update an item in the cart
+      description: Modify the quantity of an item in the shopping cart.
+      operationId: updateCartItem
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - product_id
+                - quantity
+              properties:
+                product_id:
+                  type: integer
+                  description: ID of the product to update.
+                  example: 101
+                quantity:
+                  type: integer
+                  description: New quantity of the product.
+                  example: 3
+      responses:
+        '200':
+          description: Cart item successfully updated.
+        '400':
+          description: Bad request - Invalid product ID or quantity.
+        '401':
+          description: Unauthorized - Missing or invalid token.
+        '500':
+          description: Internal server error.
+      tags:
+        - cart
+    delete:
+      summary: Remove an item from the cart
+      description: Removes a specific product from the user's cart.
+      operationId: removeCartItem
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: product_id
+          required: true
+          schema:
+            type: integer
+          description: ID of the product to remove.
+      responses:
+        '200':
+          description: Item successfully removed from the cart.
+        '400':
+          description: Bad request - Invalid product ID.
+        '401':
+          description: Unauthorized - Missing or invalid token.
+        '500':
+          description: Internal server error.
+      tags:
+        - cart
+  /checkout:
+    summary: Handle user checkout process
+    get:
+      summary: Retrieve checkout details
+      description: Returns the details for the current checkout process, including the items in the cart and the total price.
+      operationId: getCheckoutDetails
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successfully retrieved checkout details.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        product_id:
+                          type: integer
+                          description: ID of the product.
+                          example: 101
+                        name:
+                          type: string
+                          description: Name of the product.
+                          example: "Wireless Bluetooth Headphones"
+                        quantity:
+                          type: integer
+                          description: Number of units of this product in the cart.
+                          example: 2
+                        price:
+                          type: number
+                          format: float
+                          description: Price per unit.
+                          example: 59.99
+                        total_price:
+                          type: number
+                          format: float
+                          description: Total price for this item (quantity * price).
+                          example: 119.98
+                  total:
+                    type: number
+                    format: float
+                    description: Total price for all items in the cart.
+                    example: 199.98
+                  shipping_address:
+                    type: string
+                    description: Shipping address for the order.
+                    example: "123 Main St, Springfield, IL, 62701"
+                  payment_method:
+                    type: string
+                    description: Payment method selected by the user.
+                    example: "credit_card"
+        '401':
+          description: Unauthorized - Missing or invalid token.
+        '500':
+          description: Internal server error.
+      tags:
+        - checkout
+    post:
+      summary: Place an order and initiate checkout
+      description: Submits the order and processes the payment for the items in the user's cart.
+      operationId: placeOrder
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - shipping_address
+                - payment_method
+              properties:
+                shipping_address:
+                  type: string
+                  description: Shipping address for the order.
+                  example: "123 Main St, Springfield, IL, 62701"
+                payment_method:
+                  type: string
+                  description: Payment method to use for the order (e.g., "credit_card", "paypal").
+                  example: "credit_card"
+                promo_code:
+                  type: string
+                  description: Optional promo code for discount.
+                  example: "DISCOUNT20"
+      responses:
+        '201':
+          description: Successfully placed the order and initiated checkout.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  order_id:
+                    type: integer
+                    description: ID of the newly created order.
+                    example: 12345
+                  status:
+                    type: string
+                    description: Status of the order.
+                    example: "Pending"
+                  estimated_delivery:
+                    type: string
+                    description: Estimated delivery date.
+                    example: "2024-02-18"
+        '400':
+          description: Bad request - Invalid input (e.g., missing fields or invalid payment method).
+        '401':
+          description: Unauthorized - Missing or invalid token.
+        '500':
+          description: Internal server error.
+      tags:
+        - checkout
+  /orders:
+    summary: Manage user orders
+    get:
+      summary: Retrieve a list of user's orders
+      description: Returns a list of orders placed by the authenticated user.
+      operationId: getUserOrders
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [pending, completed, cancelled]
+          description: Filter orders by their status (e.g., "pending", "completed", "cancelled").
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          description: Number of orders to return per request (pagination).
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Page number for paginated results.
+        - in: query
+          name: date_from
+          schema:
+            type: string
+            format: date
+          description: Filter orders starting from this date (inclusive). Format: yyyy-mm-dd.
+        - in: query
+          name: date_to
+          schema:
+            type: string
+            format: date
+          description: Filter orders up to this date (inclusive). Format: yyyy-mm-dd.
+      responses:
+        '200':
+          description: Successfully retrieved a list of orders.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    order_id:
+                      type: integer
+                      description: Unique order ID.
+                      example: 12345
+                    status:
+                      type: string
+                      description: Current status of the order.
+                      example: "completed"
+                    total_price:
+                      type: number
+                      format: float
+                      description: Total price of the order.
+                      example: 199.98
+                    created_at:
+                      type: string
+                      format: date-time
+                      description: Timestamp when the order was created.
+                      example: "2024-02-13T12:00:00Z"
+        '401':
+          description: Unauthorized - Missing or invalid token.
+        '500':
+          description: Internal server error.
+      tags:
+        - orders
+  /logout:
+    summary: Log out the authenticated user
+    post:
+      summary: Log out the authenticated user
+      description: Logs the user out by invalidating the session (or simply removing the token).
+      operationId: logout
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successfully logged out
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "You have successfully logged out."
+        '401':
+          description: Unauthorized - Missing or invalid token
+        '500':
+          description: Internal server error
+      tags:
+        - authentication

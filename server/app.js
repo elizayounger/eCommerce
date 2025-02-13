@@ -1,10 +1,20 @@
-const express = require('express');
-// const config = require('./src/config/config');
-const { Pool } = require('pg');
-// const jwt = require('jsonwebtoken');
-require('dotenv').config();
+// --------------------- IMPORTS ---------------------
 
+import express from 'express';
+import pkg from 'pg';
+const { Pool } = pkg;
+import dotenv from 'dotenv';
+
+// project imports:
+// import getUserAccount from './src/routes/middleware.js';
+
+// --------------------- CONFIG ---------------------
+
+dotenv.config();
 const app = express();
+app.use(express.json()); 
+
+// --------------------- DATABASE CONNECTION ---------------------
 
 // Database connection
 const pool = new Pool({
@@ -15,23 +25,30 @@ const pool = new Pool({
   database: process.env.DB_NAME,
 });
 
-// const pool = new Pool({
-//   host: "localhost",
-//   port: 5432,
-//   user: "elizayounger",
-//   password: "broken-token",
-//   database: "ecommerce",
-// });
-
-// Test route
-app.get('/', (err,req,res) => {
-  res.send('Hello, world!');
-});
-
 // Connect to the database
 pool.connect()
   .then(() => console.log('Connected to the database'))
   .catch(err => console.error('Database connection error', err));
+
+// --------------------- MIDDLEWARE ---------------------
+
+
+// --------------------- ROUTES ---------------------
+
+// Get Home
+app.get('/', async (req,res,next) => {
+   try {
+      let sqlQuery = `SELECT id, name, description, price, stock_quantity FROM public.product;`;
+      const result = await pool.query(sqlQuery);
+      res.json(result.rows);
+
+   } catch (err) {
+      console.error(err);
+      res.status(500).send('Internal server error');
+   }
+});
+
+// --------------------- SERVER SETUP ---------------------
 
 // Start server
 const PORT =  3000; 
