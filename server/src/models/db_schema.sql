@@ -15,6 +15,15 @@ CREATE TYPE payment_status AS ENUM ('pending', 'completed', 'failed');
 -- DROP TABLE IF EXISTS public.product;
 
 
+-- if you want to delete the tables, this is the order: 
+-- user
+-- product
+-- cart_item
+-- order
+-- order_item
+-- payment
+
+
 -- "user" Table
 DROP TABLE IF EXISTS public."user";
 CREATE TABLE public."user" (
