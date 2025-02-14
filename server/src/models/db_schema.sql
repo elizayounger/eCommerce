@@ -7,14 +7,14 @@ CREATE TYPE role_type AS ENUM ('admin', 'customer');
 CREATE TYPE payment_status AS ENUM ('pending', 'completed', 'failed');
 
 -- if you want to delete the tables, this is the order: public.cart_item, public.order_item, public.payment, public."order", public.customer, public.product
--- DROP VIEW IF EXISTS customer_cart;
--- DROP VIEW IF EXISTS customer_order;
--- DROP TABLE IF EXISTS public.cart_item;
--- DROP TABLE IF EXISTS public.order_item;
--- DROP TABLE IF EXISTS public.payment;
--- DROP TABLE IF EXISTS public."order";
--- DROP TABLE IF EXISTS public."user";
--- DROP TABLE IF EXISTS public.product;
+DROP VIEW IF EXISTS customer_cart;
+DROP VIEW IF EXISTS customer_order;
+DROP TABLE IF EXISTS public.cart_item;
+DROP TABLE IF EXISTS public.order_item;
+DROP TABLE IF EXISTS public.payment;
+DROP TABLE IF EXISTS public."order";
+DROP TABLE IF EXISTS public."user";
+DROP TABLE IF EXISTS public.product;
 
 
 -- if you want to create the tables, this is the order: 
@@ -30,10 +30,11 @@ CREATE TYPE payment_status AS ENUM ('pending', 'completed', 'failed');
 DROP TABLE IF EXISTS public."user";
 CREATE TABLE public."user" (
     id SERIAL PRIMARY KEY,
-    name VARCHAR NOT NULL,
-    password TEXT NOT NULL,
+    firstname VARCHAR NOT NULL,
+    lastname VARCHAR NOT NULL,
     email VARCHAR UNIQUE NOT NULL,
-    role role_type NOT NULL,
+    password TEXT NOT NULL,
+    role role_type NOT NULL DEFAULT 'customer',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -90,10 +91,10 @@ CREATE TABLE public.payment (
 --  TEST DATA
 
 -- Insert Sample "user"s
-INSERT INTO public."user" (name, email, password, role, created_at) VALUES
-('Alice Johnson', 'alice@example.com', 'password123', 'customer', NOW()),
-('Bob Smith', 'bob@example.com', 'password456', 'customer', NOW()),
-('Charlie Davis', 'charlie@example.com', 'password789', 'customer', NOW());
+INSERT INTO public."user" (firstname, lastname, email, password, role, created_at) VALUES
+('Alice', 'Johnson', 'alice@example.com', 'password123', 'customer', NOW()),
+('Bob', 'Smith', 'bob@example.com', 'password456', 'customer', NOW()),
+('Charlie', 'Davis', 'charlie@example.com', 'password789', 'customer', NOW());
 
 -- Insert Sample Products
 INSERT INTO public.product (name, description, price, stock_quantity) VALUES

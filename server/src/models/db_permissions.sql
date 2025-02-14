@@ -1,23 +1,17 @@
--------- CREATE ROLES -------- (UPERUSER, CREATEROLE, CREATEDB, LOGIN)
+-------- CREATE ROLES -------- (SUPERUSER, CREATEROLE, CREATEDB, LOGIN)
 
 -- Admin: An admin could view, create, edit, and delete both products and orders, as well as manage "user" roles.
 CREATE ROLE admin WITH SUPERUSER LOGIN;
 GRANT admin TO elizayounger;
 
-
 -- customer_user: A customer would only be able to view products, create orders and make payments.
-
 CREATE USER customer_user WITH PASSWORD 'password'; -- Create the shared database user
 GRANT CONNECT ON DATABASE ecommerce TO customer_user; -- Allow it to connect to the database
-
--- ensure that the last two commands worked
-
-
--- Grant access to necessary tables
 GRANT USAGE ON SCHEMA public TO customer_user; 
+
+-- Grant access to customer_user on necessary tables:
 GRANT INSERT ON public.users TO customer_user;
 GRANT SELECT ON public.product TO customer_user;
-
 
 
 GRANT SELECT, INSERT, UPDATE ON public.users TO customer_user;

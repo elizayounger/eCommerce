@@ -1,4 +1,4 @@
-import { pool } from '../../app.js';
+import { pool } from '../config/db.js';
 
 export const loadProducts = async (req,res,next) => {
    try {

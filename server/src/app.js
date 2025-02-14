@@ -6,7 +6,7 @@ app.use(express.json());
 
 // --------------------- DATABASE CONNECTION ---------------------
 
-import { pool } from './src/config/db.js'; // import db config settings
+import { pool } from './config/db.js'; // import db config settings
 
 pool.connect() // Connect to the database
   .then(() => console.log('Connected to the database'))
@@ -14,7 +14,8 @@ pool.connect() // Connect to the database
 
 // --------------------- IMPORTS ---------------------
 
-import { loadProducts } from './src/routes/home.js';
+import { loadProducts } from './routes/home.js';
+import { registerUser } from './routes/register.js';
 
 // --------------------- MIDDLEWARE ---------------------
 
@@ -23,6 +24,8 @@ import { loadProducts } from './src/routes/home.js';
 
 // Get Home
 app.get('/', loadProducts);
+
+app.post('/register', registerUser);
 
 // --------------------- SERVER SETUP ---------------------
 
@@ -34,13 +37,6 @@ app.listen(PORT, () => {
 });
 
 // --------------------- ARCHIVE ---------------------
-// const pool = new Pool({
-//   host: config.db.host,
-//   port: config.db.port,
-//   user: config.db.user,
-//   password: config.db.password,
-//   database: config.db.database,
-// });
 
 // const PORT = config?.server?.port || 3000; // Default to 3000 if not specified in config
 

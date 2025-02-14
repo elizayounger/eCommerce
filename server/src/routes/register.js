@@ -1,15 +1,18 @@
 import bcrypt from 'bcrypt';
-import { pool } from '../db.js';
+import { pool } from '../config/db.js';
 
 export const registerUser = async (req, res) => {
-    const { name, email, password } = req.body;
+    const { firstname, lastname, email, password } = req.body;
+
+    const salt = await bcrypt.genSalt(10);        
+    const hashedPassword = await bcrypt.hash(password, salt);
+    
+    const params = [firstname, lastname, email, hashedPassword];
 
     try {
-        const hashedPassword = await bcrypt.hash(password, 10);
-
         const result = await pool.query(
-            'INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id',
-            [name, email, hashedPassword, 'customer']
+            'INSERT INTO public."user" (firstname, lastname, password, email) VALUES ($1, $2, $3, $4) RETURNING id',
+            params
         );
 
         res.status(201).json({ message: 'User registered successfully', userId: result.rows[0].id });
