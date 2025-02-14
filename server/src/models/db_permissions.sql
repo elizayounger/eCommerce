@@ -4,8 +4,25 @@
 CREATE ROLE admin WITH SUPERUSER LOGIN;
 GRANT admin TO elizayounger;
 
--- customer: A customer would only be able to view products, create orders and make payments.
-CREATE ROLE customer NOSUPERUSER;
+
+-- customer_user: A customer would only be able to view products, create orders and make payments.
+
+CREATE USER customer_user WITH PASSWORD 'password'; -- Create the shared database user
+GRANT CONNECT ON DATABASE ecommerce TO customer_user; -- Allow it to connect to the database
+
+-- ensure that the last two commands worked
+
+
+-- Grant access to necessary tables
+GRANT USAGE ON SCHEMA public TO customer_user; 
+GRANT INSERT ON public.users TO customer_user;
+GRANT SELECT ON public.product TO customer_user;
+
+
+
+GRANT SELECT, INSERT, UPDATE ON public.users TO customer_user;
+GRANT SELECT, INSERT, UPDATE ON public.orders TO customer_user;
+
 
 -------- GRANT ROLES --------
 -- ADMIN - already a superuser
@@ -55,4 +72,13 @@ TRUNCATE
 REFERENCES
 TRIGGER
 
+-------------------- CHECKS --------------------
+-- checks user has access to database
+SELECT datname, rolname, has_database_privilege(rolname, datname, 'CONNECT') AS has_connect 
+FROM pg_database, pg_roles
+WHERE datname = 'ecommerce' AND rolname = 'customer_user';
+
+-- checks what grants the customer_user has on tables
+select * from information_schema.role_table_grants rtg
+where grantee = 'customer_user';
 

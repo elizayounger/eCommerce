@@ -1,34 +1,20 @@
-// --------------------- IMPORTS ---------------------
-
-import express from 'express';
-import pkg from 'pg';
-const { Pool } = pkg;
-import dotenv from 'dotenv';
-
-// project imports:
-// import getUserAccount from './src/routes/middleware.js';
-
 // --------------------- CONFIG ---------------------
 
-dotenv.config();
+import express from 'express';
 const app = express();
 app.use(express.json()); 
 
 // --------------------- DATABASE CONNECTION ---------------------
 
-// Database connection
-const pool = new Pool({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-});
+import { pool } from './src/config/db.js'; // import db config settings
 
-// Connect to the database
-pool.connect()
+pool.connect() // Connect to the database
   .then(() => console.log('Connected to the database'))
   .catch(err => console.error('Database connection error', err));
+
+// --------------------- IMPORTS ---------------------
+
+import { loadProducts } from './src/routes/home.js';
 
 // --------------------- MIDDLEWARE ---------------------
 
@@ -36,17 +22,7 @@ pool.connect()
 // --------------------- ROUTES ---------------------
 
 // Get Home
-app.get('/', async (req,res,next) => {
-   try {
-      let sqlQuery = `SELECT id, name, description, price, stock_quantity FROM public.product;`;
-      const result = await pool.query(sqlQuery);
-      res.json(result.rows);
-
-   } catch (err) {
-      console.error(err);
-      res.status(500).send('Internal server error');
-   }
-});
+app.get('/', loadProducts);
 
 // --------------------- SERVER SETUP ---------------------
 

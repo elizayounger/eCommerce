@@ -1,9 +1,5 @@
+// REGISTER USER 
 
-
-// REGISTER USER
-export const registerUser = (err,req,res,next) => {
-
-};
 
 // USER LOGIN
 

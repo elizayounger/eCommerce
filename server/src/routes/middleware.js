@@ -1,3 +1,0 @@
-// PARAMS CHECK
-
-// BODY CHECK
