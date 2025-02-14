@@ -1,20 +1,19 @@
 // --------------------- CONFIG ---------------------
-
+import dotenv from 'dotenv';
 import express from 'express';
+import { pool, connectDB } from './config/db.js';                    // Import db config settings
+import { authenticateUser } from './middleware/validateJWT.js';
+
+dotenv.config();
+
 const app = express();
-app.use(express.json()); 
-
-// --------------------- DATABASE CONNECTION ---------------------
-
-import { pool } from './config/db.js'; // import db config settings
-
-pool.connect() // Connect to the database
-  .then(() => console.log('Connected to the database'))
-  .catch(err => console.error('Database connection error', err));
+app.use(express.json());
+connectDB(); // connect to database
 
 // --------------------- IMPORTS ---------------------
 
-import { loadProducts } from './routes/home.js';
+import { loadProducts } from './routes/home.js'; 
+import { validateRegister } from './middleware/validateRegister.js';
 import { registerUser } from './routes/register.js';
 
 // --------------------- MIDDLEWARE ---------------------
@@ -25,15 +24,14 @@ import { registerUser } from './routes/register.js';
 // Get Home
 app.get('/', loadProducts);
 
-app.post('/register', registerUser);
+app.post('/register', /*validateRegister,*/ registerUser);
 
 // --------------------- SERVER SETUP ---------------------
 
-// Start server
-const PORT =  3000; 
+const PORT =  process.env.SERVER_PORT || 3000; 
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);  // Use the PORT variable here
+  console.log(`Server running on port ${PORT}`);
 });
 
 // --------------------- ARCHIVE ---------------------

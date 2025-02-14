@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import { pool } from '../config/db.js';
 
 export const registerUser = async (req, res) => {
+
     const { firstname, lastname, email, password } = req.body;
 
     const salt = await bcrypt.genSalt(10);        
@@ -11,7 +12,7 @@ export const registerUser = async (req, res) => {
 
     try {
         const result = await pool.query(
-            'INSERT INTO public."user" (firstname, lastname, password, email) VALUES ($1, $2, $3, $4) RETURNING id',
+            'INSERT INTO public."user" (firstname, lastname, email, password) VALUES ($1, $2, $3, $4) RETURNING id',
             params
         );
 

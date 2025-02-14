@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import { pool } from '../db.js';  // Use a separate file to manage DB connection
+import { pool } from '../config/db.js'; 
+// import { sessionMiddleware } from '../config/session.js'; 
 
 const SECRET_KEY = process.env.JWT_SECRET || "supersecretkey";
 
@@ -24,9 +25,17 @@ export const loginUser = async (req, res) => {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
+        req.session.user = {
+            id: user.id,
+            email: user.email,
+            username: user.username, // Store any other necessary user info
+        };
+      
+        res.json({ message: 'Login successful', user: req.session.user });
+        
         // Generate JWT token
-        const token = jwt.sign({ userId: user.id, role: "customer" }, SECRET_KEY, { expiresIn: '1h' });
-
+        const token = jwt.sign({ userId: user.id, role: "customer" }, SECRET_KEY, { expiresIn: '1h' });  
+          
         res.json({ token });
 
     } catch (err) {

@@ -1,4 +1,3 @@
-
 import pkg from 'pg';
 const { Pool } = pkg;
 import dotenv from 'dotenv';
@@ -18,4 +17,14 @@ export const config = {
   jwtSecret: process.env.JWT_SECRET || 'your_secret_key', // JWT Secret Key for authentication
 };
 
-export const pool = new Pool(config.db);
+export const pool = new Pool(config.db); // Initialize the pool 
+
+export const connectDB = async () => { // Function to connect to the database and log success or failure
+  try {
+    await pool.connect();
+    console.log('Connected to the database ✅');
+  } catch (err) {
+    console.error('Database connection error ❌ : ', err);
+    process.exit(1); 
+  }
+};
