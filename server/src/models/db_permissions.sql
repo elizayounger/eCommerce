@@ -12,6 +12,8 @@ GRANT USAGE ON SCHEMA public TO customer_user;
 -- Grant access to customer_user on necessary tables:
 GRANT INSERT ON public."user" TO customer_user;
 GRANT SELECT ON public.product TO customer_user;
+GRANT USAGE ON SEQUENCE public.user_id_seq TO customer_user; -- allows customer_user to use autoincrement
+
 
 GRANT SELECT, INSERT, UPDATE ON public.users TO customer_user;
 GRANT SELECT, INSERT, UPDATE ON public.orders TO customer_user;
@@ -28,7 +30,10 @@ USING (email = current_setting('app.current_user')::text);
 CREATE POLICY insert_user
 ON public."user"
 FOR INSERT
-WITH CHECK (true);
+WITH CHECK (email LIKE '%@%.%');
+
+
+
 
 
 

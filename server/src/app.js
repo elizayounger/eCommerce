@@ -2,7 +2,7 @@
 import dotenv from 'dotenv';
 import express from 'express';
 import { pool, connectDB } from './config/db.js';                    // Import db config settings
-import { authenticateUser } from './middleware/validateJWT.js';
+import { authenticateUser } from './middleware/authenticateUser.js';
 
 dotenv.config();
 
@@ -25,6 +25,8 @@ import { registerUser } from './routes/register.js';
 app.get('/', loadProducts);
 
 app.post('/register', /*validateRegister,*/ registerUser);
+
+app.post('/login', );
 
 // --------------------- SERVER SETUP ---------------------
 
