@@ -91,10 +91,10 @@ CREATE TABLE public.payment (
 --  TEST DATA
 
 -- Insert Sample "user"s
-INSERT INTO public."user" (firstname, lastname, email, password, role, created_at) VALUES
-('Alice', 'Johnson', 'alice@example.com', 'password123', 'customer', NOW()),
-('Bob', 'Smith', 'bob@example.com', 'password456', 'customer', NOW()),
-('Charlie', 'Davis', 'charlie@example.com', 'password789', 'customer', NOW());
+INSERT INTO public."user" (firstname, lastname, email, password) VALUES
+('Alice', 'Johnson', 'alice@example.com', 'password123'),
+('Bob', 'Smith', 'bob@example.com', 'password456'),
+('Charlie', 'Davis', 'charlie@example.com', 'password789');
 
 -- Insert Sample Products
 INSERT INTO public.product (name, description, price, stock_quantity) VALUES

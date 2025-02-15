@@ -2,7 +2,6 @@
 import dotenv from 'dotenv';
 import express from 'express';
 import { pool, connectDB } from './config/db.js';                    // Import db config settings
-import { authenticateUser } from './middleware/authenticateUser.js';
 
 dotenv.config();
 
@@ -12,11 +11,14 @@ connectDB(); // connect to database
 
 // --------------------- IMPORTS ---------------------
 
-import { loadProducts } from './routes/home.js'; 
-import { validateRegister } from './middleware/validateRegister.js';
-import { registerUser } from './routes/register.js';
+import { validateRegister } from './middleware/validateRequest.js';     // middleware
+import { validateLogin } from './middleware/validateRequest.js';        // middleware
+import { authenticateToken } from './middleware/authenticateToken.js';  // middleware
 
-// --------------------- MIDDLEWARE ---------------------
+import { loadProducts } from './routes/home.js'; 
+import { registerUser } from './routes/register.js';
+import { loginUser } from './routes/login.js';
+
 
 
 // --------------------- ROUTES ---------------------
@@ -24,9 +26,9 @@ import { registerUser } from './routes/register.js';
 // Get Home
 app.get('/', loadProducts);
 
-app.post('/register', /*validateRegister,*/ registerUser);
+app.post('/register', validateRegister, registerUser);
 
-app.post('/login', );
+app.post('/login', validateLogin, loginUser);
 
 // --------------------- SERVER SETUP ---------------------
 

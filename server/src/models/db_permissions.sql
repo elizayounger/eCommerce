@@ -4,22 +4,22 @@
 CREATE ROLE admin WITH SUPERUSER LOGIN;
 GRANT admin TO elizayounger;
 
+-------- PERMISSIONS --------
+
 -- customer_user: A customer would only be able to view products, create orders and make payments.
 CREATE USER customer_user WITH PASSWORD 'password'; -- Create the shared database user
 GRANT CONNECT ON DATABASE ecommerce TO customer_user; -- Allow it to connect to the database
 GRANT USAGE ON SCHEMA public TO customer_user; 
 
 -- Grant access to customer_user on necessary tables:
-GRANT INSERT ON public."user" TO customer_user;
+GRANT SELECT, INSERT ON public."user" TO customer_user;
 GRANT SELECT ON public.product TO customer_user;
-GRANT USAGE ON SEQUENCE public.user_id_seq TO customer_user; -- allows customer_user to use autoincrement
+GRANT USAGE, SELECT ON SEQUENCE public.user_id_seq TO customer_user; -- allows customer_user to select autoincrement
+GRANT USAGE ON SCHEMA pg_catalog TO customer_user; -- allow customer_user to set app.customer_user
+GRANT EXECUTE ON FUNCTION pg_catalog.set_config(text, text, boolean) TO customer_user; -- ''
 
+-------- POLICYS & RLS --------
 
-GRANT SELECT, INSERT, UPDATE ON public.users TO customer_user;
-GRANT SELECT, INSERT, UPDATE ON public.orders TO customer_user;
-
-
--------- TABLE SECURITY LEVEL --------
 ALTER TABLE public."user" ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY select_own_user
@@ -32,16 +32,7 @@ ON public."user"
 FOR INSERT
 WITH CHECK (email LIKE '%@%.%');
 
-
-
-
-
-
 -------- GRANT ROLES --------
--- ADMIN - already a superuser
-
---  CUSTOMER START
-
 GRANT INSERT ON public.cart_item TO customer; -- allow customer to add to cart
 GRANT SELECT (quantity) ON public.cart_item TO customer; -- allow customer to see what's in their basket
 
@@ -61,8 +52,6 @@ customer: {
         ],
     DELETE: [cart_item],
 }
-
---  CUSTOMER END 
 
 -- VIEWS 
 customer_cart(id,product_name,quantity)
