@@ -16,7 +16,7 @@ export const registerUser = async (req, res) => {
             params
         );
 
-        const token = generateToken(email, password);
+        const token = generateToken(email);
 
         res.status(201).json({ message: 'User registered successfully', token }); // Send response with token
 
