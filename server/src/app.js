@@ -17,7 +17,7 @@ import { authenticateToken } from './middleware/authenticateToken.js';  // middl
 
 import { loadProducts } from './routes/home.js'; 
 import { registerUser } from './routes/register.js';
-import { loginUser } from './routes/login.js';
+import { verifyUserCredentials } from './routes/login.js';
 
 
 
@@ -28,7 +28,7 @@ app.get('/', loadProducts);
 
 app.post('/register', validateRegister, registerUser);
 
-app.post('/login', validateLogin, loginUser);
+app.post('/login', validateLogin, verifyUserCredentials);
 
 // --------------------- SERVER SETUP ---------------------
 

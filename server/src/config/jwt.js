@@ -14,4 +14,12 @@ export const generateToken = (email) => {
     return token;
 };
 
+export const generateRenewalToken = (email) => {
+    const token = jwt.sign( 
+        { email: email },
+        JWT_SECRET,
+        { expiresIn: '48h' } 
+    );
+    return token;
+};
 // TODO: maybe add renewal token
