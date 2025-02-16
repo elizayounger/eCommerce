@@ -14,16 +14,17 @@ connectDB(); // connect to database
 import { 
    validateRegister, 
    validateLogin, 
-   validateProfile 
+   validateProfile
    } from './middleware/validateRequest.js';     // middleware
 import { authenticateToken } from './middleware/authenticateToken.js';  // middleware
 import { saltHashPassword } from './middleware/saltHashPassword.js'; // middleware
 import { checkPreExistingEmail } from './middleware/checkDuplicateEmail.js'; // middleware
+import { checkProfileExists } from './middleware/profileExists.js' // middleware
 
 import { loadProducts } from './routes/home.js'; 
 import { registerUser } from './routes/register.js';
 import { verifyUserCredentials } from './routes/login.js';
-import { getProfile, updateProfile } from './routes/profile.js';
+import { getProfile, updateProfile, deleteProfile } from './routes/profile.js';
 
 // --------------------- ROUTES ---------------------
 
@@ -35,7 +36,12 @@ app.post('/login', validateLogin, verifyUserCredentials);
 
 app.get('/profile', authenticateToken, getProfile);
 
-app.put('/profile', authenticateToken, validateProfile, saltHashPassword, checkPreExistingEmail, updateProfile);
+app.put('/profile', authenticateToken, checkProfileExists, checkPreExistingEmail, validateProfile, saltHashPassword, updateProfile);
+
+app.delete('/profile', authenticateToken, validateLogin, deleteProfile);
+
+    // Previous middleware has ensured: token authorized, (if) new password has already been salt & hashed,
+    // applicable fields exist and are correct format, no extra fields in body, XSS nullified
 
 // --------------------- SERVER SETUP ---------------------
 

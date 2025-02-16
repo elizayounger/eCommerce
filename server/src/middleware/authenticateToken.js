@@ -28,7 +28,7 @@ export const authenticateToken = async (req, res, next) => {
 
         req.user = decoded;
         res.locals.user = decoded;  // Store user info in res.locals for middleware safety
-
+        
         next();
     } catch (err) {
         console.error("JWT Verification Error:", err.message);

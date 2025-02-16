@@ -46,9 +46,31 @@ GRANT EXECUTE ON FUNCTION pg_catalog.set_config(text, text, boolean) TO customer
 
 ALTER TABLE public."user" ENABLE ROW LEVEL SECURITY;
 
+-- Enable Row-Level Security on the user table
+ALTER TABLE public."user" ENABLE ROW LEVEL SECURITY;
+
+-- Allow users to SELECT (view) only their own row
 CREATE POLICY select_own_user
 ON public."user"
 FOR SELECT
+USING (email = current_setting('app.current_user')::text);
+
+-- Allow users to INSERT (create) their own row
+CREATE POLICY insert_own_user
+ON public."user"
+FOR INSERT
+WITH CHECK (email = current_setting('app.current_user')::text);
+
+-- Allow users to UPDATE (edit) only their own row
+CREATE POLICY update_own_user
+ON public."user"
+FOR UPDATE
+USING (email = current_setting('app.current_user')::text);
+
+-- Allow users to DELETE only their own row
+CREATE POLICY delete_own_user
+ON public."user"
+FOR DELETE
 USING (email = current_setting('app.current_user')::text);
 
 CREATE POLICY insert_user

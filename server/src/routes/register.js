@@ -3,10 +3,12 @@ import bcrypt from 'bcrypt';
 import { generateToken } from '../config/jwt.js';
 
 export const registerUser = async (req, res) => {
+    // middlware has ensured: applicable fields exist and are correct format, XSS nullified, (if) new password has already been salt&hashed,
 
-    const { firstname, lastname, email, hashedPassword } = req.body; // user details
+    console.log(`in register req.user: ${JSON.stringify(req.user)}`);
+    const { firstname, lastname, email, password } = req.user; // user details
     
-    const params = [firstname, lastname, email, hashedPassword];
+    const params = [firstname, lastname, email, password];
 
     try {
         const result = await customer_pool.query(

@@ -1,14 +1,45 @@
 import { customer_pool } from '../config/db.js'; 
 import { setAppCurrentUser, resetAppCurrentUser } from '../middleware/rlsProtectedQuery.js';
 
+// ------------------ DELETE ------------------
+export const deleteProfile = async (req, res) => {
+    // middlware has ensured: token authorized, applicable fields exist and are correct format, XSS nullified
+    const email = res.locals.user.email;
+    if (!email) {   throw new Error("Missing res.locals.user.email");   };
+
+    try {
+        await setAppCurrentUser(email); // Set session variable
+
+        const userQuery = `DELETE FROM public."user" WHERE email = current_setting('app.current_user');`;
+        const { rows } = await customer_pool.query(userQuery);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        };
+
+        const profile = rows[0];
+
+        if (!profile.firstname || !profile.lastname || !profile.email) {
+            return res.status(400).json({ message: 'Missing profile information in database' });
+        };
+
+        res.json({ message: 'Profile request successful', profile });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Internal Server Error' });
+    } finally {
+        await resetAppCurrentUser(); // Ensure cleanup even in case of an error
+    }
+};
+
 // ------------------ PUT ------------------
 export const updateProfile = async (req, res) => {
     // middlware has ensured: token authorized, (if) new password has already been salt&hashed,
-    // applicable fields exist and are correct format, no extra fields in body, XSS nullified
-    // email doesn't already exist?
+    // applicable fields exist and are correct format, no extra fields in body, XSS nullified,
+    // email doesn't already exist
 
-    const email = req.user.email;
-    if (!email) {   throw new Error("Missing req.user.email");   };
+    const email = res.locals.user.email;
+    if (!email) {   throw new Error("Missing res.locals.user.email");   };
 
     try {
         await setAppCurrentUser(email); // Set current user for RLS
@@ -44,8 +75,8 @@ export const updateProfile = async (req, res) => {
 
 // ------------------ GET ------------------
 export const getProfile = async (req, res) => {
-    const email = req.user.email;
-    if (!email) {   throw new Error("Missing req.user.email");   };
+    const email = res.locals.user.email;
+    if (!email) {   throw new Error("Missing res.locals.user.email");   };
 
     try {
         await setAppCurrentUser(email); // Set session variable
