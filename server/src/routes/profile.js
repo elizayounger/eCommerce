@@ -1,10 +1,11 @@
-import { pool } from '../config/db.js'; 
+import { customer_pool } from '../config/db.js'; 
 import { setAppCurrentUser, resetAppCurrentUser } from '../middleware/rlsProtectedQuery.js';
 
 // ------------------ PUT ------------------
 export const updateProfile = async (req, res) => {
     // middlware has ensured: token authorized, (if) new password has already been salt&hashed,
     // applicable fields exist and are correct format, no extra fields in body, XSS nullified
+    // email doesn't already exist?
 
     const email = req.user.email;
     if (!email) {   throw new Error("Missing req.user.email");   };
@@ -22,9 +23,12 @@ export const updateProfile = async (req, res) => {
             index++;
         });
 
-        let query = `UPDATE public."user" SET ${updates.join(", ")} WHERE email = current_setting('app.current_user') RETURNING *;`;
+        let query = `
+            UPDATE public."user" SET ${updates.join(", ")} 
+            WHERE email = current_setting('app.current_user') 
+            RETURNING firstname, lastname, email;`;
 
-        const { rows: updatedRows } = await pool.query(query, params);
+        const { rows: updatedRows } = await customer_pool.query(query, params);
         if (updatedRows.length === 0) {   return res.status(400).json({ message: 'Failed to update profile' });   }
 
         const updatedProfile = updatedRows[0];
@@ -47,7 +51,7 @@ export const getProfile = async (req, res) => {
         await setAppCurrentUser(email); // Set session variable
 
         const userQuery = `SELECT firstname, lastname, email FROM public."user" WHERE email = current_setting('app.current_user');`;
-        const { rows } = await pool.query(userQuery);
+        const { rows } = await customer_pool.query(userQuery);
 
         if (rows.length === 0) {
             return res.status(404).json({ message: 'User not found' });

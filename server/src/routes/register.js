@@ -1,4 +1,4 @@
-import { pool } from '../config/db.js';
+import { customer_pool } from '../config/db.js';
 import bcrypt from 'bcrypt';
 import { generateToken } from '../config/jwt.js';
 
@@ -9,7 +9,7 @@ export const registerUser = async (req, res) => {
     const params = [firstname, lastname, email, hashedPassword];
 
     try {
-        const result = await pool.query(
+        const result = await customer_pool.query(
             'INSERT INTO public."user" (firstname, lastname, email, password) VALUES ($1, $2, $3, $4)',
             params
         );

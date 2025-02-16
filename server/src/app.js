@@ -17,7 +17,8 @@ import {
    validateProfile 
    } from './middleware/validateRequest.js';     // middleware
 import { authenticateToken } from './middleware/authenticateToken.js';  // middleware
-import { saltHashPassword } from './middleware/saltHashPassword.js';
+import { saltHashPassword } from './middleware/saltHashPassword.js'; // middleware
+import { checkPreExistingEmail } from './middleware/checkDuplicateEmail.js'; // middleware
 
 import { loadProducts } from './routes/home.js'; 
 import { registerUser } from './routes/register.js';
@@ -34,7 +35,7 @@ app.post('/login', validateLogin, verifyUserCredentials);
 
 app.get('/profile', authenticateToken, getProfile);
 
-app.put('/profile', authenticateToken, validateProfile, saltHashPassword, updateProfile);
+app.put('/profile', authenticateToken, validateProfile, saltHashPassword, checkPreExistingEmail, updateProfile);
 
 // --------------------- SERVER SETUP ---------------------
 

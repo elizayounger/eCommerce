@@ -4,7 +4,31 @@
 CREATE ROLE admin WITH SUPERUSER LOGIN;
 GRANT admin TO elizayounger;
 
--------- PERMISSIONS --------
+-------- EMPLOYEE PERMISSIONS --------
+
+CREATE ROLE employee;
+GRANT CONNECT ON DATABASE ecommerce TO employee; -- Allow it to connect to the database
+GRANT USAGE ON SCHEMA public TO employee; 
+
+-- Grant access to customer_user on necessary tables:
+GRANT SELECT, DELETE ON public."user" TO employee;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.product TO employee;
+GRANT USAGE, SELECT ON SEQUENCE public.user_id_seq TO employee; -- allows customer_user to select autoincrement
+GRANT USAGE ON SCHEMA pg_catalog TO employee; -- allow customer_user to set app.customer_user
+
+CREATE USER employee_user WITH PASSWORD 'password'; -- Create the shared database user
+GRANT employee TO employee_user;
+
+--- EMPLOYEE POLICYS ---
+
+CREATE POLICY select_all_users
+ON public."user"
+FOR SELECT
+TO employee_user
+USING (true);
+
+
+-------- CUSTOMER PERMISSIONS --------
 
 -- customer_user: A customer would only be able to view products, create orders and make payments.
 CREATE USER customer_user WITH PASSWORD 'password'; -- Create the shared database user

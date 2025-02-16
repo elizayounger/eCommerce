@@ -1,0 +1,1 @@
+-- TODO: truncate trigger which will clean database after user has been deleted

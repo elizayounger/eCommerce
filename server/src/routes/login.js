@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import { pool } from '../config/db.js'; 
+import { customer_pool } from '../config/db.js'; 
 import { generateToken } from '../config/jwt.js';
 import { setAppCurrentUser, resetAppCurrentUser } from '../middleware/rlsProtectedQuery.js';
 
@@ -12,7 +12,7 @@ export const verifyUserCredentials = async (req, res) => {
 
         // Query user table based on session variable (meaning app.current_user) for profile details
         const userQuery = `SELECT password FROM public."user" WHERE email = current_setting('app.current_user');`;
-        const { rows } = await pool.query(userQuery);
+        const { rows } = await customer_pool.query(userQuery);
 
         // if nothing returned throw error
         if (rows.length === 0) {   
