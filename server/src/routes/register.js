@@ -4,9 +4,7 @@ import { generateToken } from '../config/jwt.js';
 
 export const registerUser = async (req, res) => {
 
-    const { firstname, lastname, email, password } = req.body; // user details
-    const salt = await bcrypt.genSalt(10); // salt
-    const hashedPassword = await bcrypt.hash(password, salt); // hash
+    const { firstname, lastname, email, hashedPassword } = req.body; // user details
     
     const params = [firstname, lastname, email, hashedPassword];
 

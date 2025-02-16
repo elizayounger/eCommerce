@@ -1,7 +1,7 @@
 // --------------------- CONFIG ---------------------
 import dotenv from 'dotenv';
 import express from 'express';
-import { pool, connectDB } from './config/db.js';                    // Import db config settings
+import { connectDB } from './config/db.js'; // Import db config settings
 
 dotenv.config();
 
@@ -11,42 +11,35 @@ connectDB(); // connect to database
 
 // --------------------- IMPORTS ---------------------
 
-import { validateRegister } from './middleware/validateRequest.js';     // middleware
-import { validateLogin } from './middleware/validateRequest.js';        // middleware
+import { 
+   validateRegister, 
+   validateLogin, 
+   validateProfile 
+   } from './middleware/validateRequest.js';     // middleware
 import { authenticateToken } from './middleware/authenticateToken.js';  // middleware
+import { saltHashPassword } from './middleware/saltHashPassword.js';
 
 import { loadProducts } from './routes/home.js'; 
 import { registerUser } from './routes/register.js';
 import { verifyUserCredentials } from './routes/login.js';
-
-
+import { getProfile, updateProfile } from './routes/profile.js';
 
 // --------------------- ROUTES ---------------------
 
-// Get Home
 app.get('/', loadProducts);
 
-app.post('/register', validateRegister, registerUser);
+app.post('/register', validateRegister, saltHashPassword, registerUser);
 
 app.post('/login', validateLogin, verifyUserCredentials);
+
+app.get('/profile', authenticateToken, getProfile);
+
+app.put('/profile', authenticateToken, validateProfile, saltHashPassword, updateProfile);
 
 // --------------------- SERVER SETUP ---------------------
 
 const PORT =  process.env.SERVER_PORT || 3000; 
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+   console.log(`Server running on port ${PORT}`);
 });
-
-// --------------------- ARCHIVE ---------------------
-
-// const PORT = config?.server?.port || 3000; // Default to 3000 if not specified in config
-
-// JWT Token Example
-// const token = jwt.sign({ userId: 123 }, config.jwtSecret);
-// console.log('Generated Token:', token);
-
-
-// app.listen(config.server.port, () => {
-//   console.log(`Server running on port ${config.server.port}`);
-// });

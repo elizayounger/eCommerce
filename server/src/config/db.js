@@ -22,7 +22,7 @@ export const pool = new Pool(config.db); // Initialize the pool
 export const connectDB = async () => { // Function to connect to the database and log success or failure
   try {
     await pool.connect();
-    console.log('Connected to the database ✅');
+    console.log('Connected to the database ✅ \n');
   } catch (err) {
     console.error('Database connection error ❌ : ', err);
     process.exit(1); 
