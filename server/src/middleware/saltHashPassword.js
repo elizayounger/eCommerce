@@ -10,6 +10,5 @@ export const saltHashPassword = async (req, res, next) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     req.user.password = hashedPassword;
-    console.log(`in hash password req.user: ${JSON.stringify(req.user)}`);
     next();
 }

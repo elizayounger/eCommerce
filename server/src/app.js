@@ -38,10 +38,7 @@ app.get('/profile', authenticateToken, getProfile);
 
 app.put('/profile', authenticateToken, checkProfileExists, checkPreExistingEmail, validateProfile, saltHashPassword, updateProfile);
 
-app.delete('/profile', authenticateToken, validateLogin, deleteProfile);
-
-    // Previous middleware has ensured: token authorized, (if) new password has already been salt & hashed,
-    // applicable fields exist and are correct format, no extra fields in body, XSS nullified
+app.delete('/profile', authenticateToken, checkProfileExists, validateLogin, deleteProfile);
 
 // --------------------- SERVER SETUP ---------------------
 

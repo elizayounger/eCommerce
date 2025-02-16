@@ -56,7 +56,6 @@ export const validateRegister = [
 
    (req, res, next) => {
       req.user = req.body;
-      console.log(`req.user: ${JSON.stringify(req.user)}`);
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
          return res.status(400).json({ errors: errors.array() });

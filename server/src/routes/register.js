@@ -4,8 +4,6 @@ import { generateToken } from '../config/jwt.js';
 
 export const registerUser = async (req, res) => {
     // middlware has ensured: applicable fields exist and are correct format, XSS nullified, (if) new password has already been salt&hashed,
-
-    console.log(`in register req.user: ${JSON.stringify(req.user)}`);
     const { firstname, lastname, email, password } = req.user; // user details
     
     const params = [firstname, lastname, email, password];

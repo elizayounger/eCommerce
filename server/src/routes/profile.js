@@ -3,27 +3,26 @@ import { setAppCurrentUser, resetAppCurrentUser } from '../middleware/rlsProtect
 
 // ------------------ DELETE ------------------
 export const deleteProfile = async (req, res) => {
-    // middlware has ensured: token authorized, applicable fields exist and are correct format, XSS nullified
+    // middlware has ensured: token authorized, profile exists, applicable fields exist and are correct format, XSS nullified
+
     const email = res.locals.user.email;
     if (!email) {   throw new Error("Missing res.locals.user.email");   };
 
     try {
         await setAppCurrentUser(email); // Set session variable
+        const deleteQuery = `
+                    DELETE FROM public."user" 
+                    WHERE email = current_setting('app.current_user') 
+                    RETURNING firstname, lastname, email;
+                `;
 
-        const userQuery = `DELETE FROM public."user" WHERE email = current_setting('app.current_user');`;
-        const { rows } = await customer_pool.query(userQuery);
+        const { rows } = await customer_pool.query(deleteQuery);
 
         if (rows.length === 0) {
-            return res.status(404).json({ message: 'User not found' });
-        };
+            return res.status(404).json({ message: "User not found" });
+        }
 
-        const profile = rows[0];
-
-        if (!profile.firstname || !profile.lastname || !profile.email) {
-            return res.status(400).json({ message: 'Missing profile information in database' });
-        };
-
-        res.json({ message: 'Profile request successful', profile });
+        res.status(200).send({ message: 'Profile successfully deleted' });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Internal Server Error' });
