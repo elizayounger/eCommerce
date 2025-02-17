@@ -3,7 +3,7 @@ DROP DATABASE IF EXISTS ecommerce;
 CREATE DATABASE ecommerce OWNER elizayounger;
 
 -- Define ENUM types
-CREATE TYPE role_type AS ENUM ('admin', 'customer');
+CREATE TYPE role_type AS ENUM ('employee', 'customer');
 CREATE TYPE payment_status AS ENUM ('pending', 'completed', 'failed');
 
 -- if you want to delete the tables, this is the order: public.cart_item, public.order_item, public.payment, public."order", public.customer, public.product
@@ -15,15 +15,6 @@ DROP TABLE IF EXISTS public.payment;
 DROP TABLE IF EXISTS public."order";
 DROP TABLE IF EXISTS public."user";
 DROP TABLE IF EXISTS public.product;
-
-
--- if you want to create the tables, this is the order: 
--- user
--- product
--- cart_item
--- order
--- order_item
--- payment
 
 
 -- "user" Table
@@ -44,7 +35,7 @@ CREATE TABLE public.product (
     id SERIAL PRIMARY KEY,
     name VARCHAR NOT NULL,
     description TEXT,
-    price MONEY NOT NULL,
+    price NUMERIC(10,2) NOT NULL,
     stock_quantity INTEGER NOT NULL CHECK (stock_quantity >= 0)
 );
 
@@ -65,7 +56,7 @@ CREATE TABLE public."order" (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES "user"(id) ON DELETE CASCADE,
     order_date DATE DEFAULT CURRENT_DATE,
-    total_price MONEY NOT NULL DEFAULT 0.00
+    total_price NUMERIC(10,2) NOT NULL DEFAULT 0.00
 );
 
 -- Order Item Table (Many-to-Many between Order and Product)

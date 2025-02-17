@@ -7,7 +7,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
 
 export const generateToken = (email) => {
     const token = jwt.sign( 
-        { email: email },
+        { email: email},
         JWT_SECRET,
         { expiresIn: '1h' } 
     );
@@ -16,7 +16,7 @@ export const generateToken = (email) => {
 
 export const generateRenewalToken = (email) => {
     const token = jwt.sign( 
-        { email: email },
+        { email: email},
         JWT_SECRET,
         { expiresIn: '48h' } 
     );

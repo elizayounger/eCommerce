@@ -1,17 +1,11 @@
-import { customer_pool } from "../config/db.js";
-import { setAppCurrentUser, resetAppCurrentUser } from './rlsProtectedQuery.js';
+import { employee_pool } from "../config/db.js";
 
 export const checkProfileExists = async (req, res, next) => {
     // previous middlware has ensured: token authorized 
 
-    const email = res.locals.user.email;
-    if (!email) {   throw new Error("Missing res.locals.user.email");   };
-
     try {
-        await setAppCurrentUser(email); // Set session variable
-
-        const userQuery = `SELECT firstname, lastname, email FROM public."user" WHERE email = current_setting('app.current_user');`;
-        const { rows } = await customer_pool.query(userQuery);
+        const userQuery = `SELECT id, firstname, lastname, email FROM public."user" WHERE email = current_setting('app.current_user');`;
+        const { rows } = await employee_pool.query(userQuery);
 
         if (rows.length === 0) {
             return res.status(404).json({ message: 'User not found' });
@@ -23,13 +17,11 @@ export const checkProfileExists = async (req, res, next) => {
             return res.status(400).json({ message: 'Missing profile information in database' });
         };
 
-        req.user = {firstname: profile.firstname, lastname: profile.lastname};
+        req.user = {id: profile.id, firstname: profile.firstname, lastname: profile.lastname, email: profile.email};
 
         next();
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Internal Server Error' });
-    } finally {
-        await resetAppCurrentUser(); // Ensure cleanup even in case of an error
     }
 };

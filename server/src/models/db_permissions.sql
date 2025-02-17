@@ -10,14 +10,15 @@ CREATE ROLE employee;
 GRANT CONNECT ON DATABASE ecommerce TO employee; -- Allow it to connect to the database
 GRANT USAGE ON SCHEMA public TO employee; 
 
--- Grant access to customer_user on necessary tables:
-GRANT SELECT, DELETE ON public."user" TO employee;
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.product TO employee;
-GRANT USAGE, SELECT ON SEQUENCE public.user_id_seq TO employee; -- allows customer_user to select autoincrement
-GRANT USAGE ON SCHEMA pg_catalog TO employee; -- allow customer_user to set app.customer_user
-
 CREATE USER employee_user WITH PASSWORD 'password'; -- Create the shared database user
 GRANT employee TO employee_user;
+
+-- Grant access to customer_user on necessary tables:
+GRANT SELECT, INSERT, UPDATE, DELETE ON public."user" TO employee;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.product TO employee;
+GRANT USAGE, SELECT ON SEQUENCE public.product_id_seq TO employee;
+GRANT USAGE, SELECT ON SEQUENCE public.user_id_seq TO employee; -- allows customer_user to select autoincrement
+GRANT USAGE ON SCHEMA pg_catalog TO employee; -- allow customer_user to set app.customer_user
 
 --- EMPLOYEE POLICYS ---
 
@@ -78,28 +79,8 @@ ON public."user"
 FOR INSERT
 WITH CHECK (email LIKE '%@%.%');
 
--------- GRANT ROLES --------
-GRANT INSERT ON public.cart_item TO customer; -- allow customer to add to cart
-GRANT SELECT (quantity) ON public.cart_item TO customer; -- allow customer to see what's in their basket
 
-
-customer: {
-    USAGE: [customer_cart, customer_order, cart_item, order_item,"user", product]
-    INSERT: [cart_item],
-    SELECT: [
-        customer_cart(product_name,quantity,cart_total)(RLS), 
-        order_item(RLS), 
-        "user"(name,email)(RLS), 
-        product(name,description,price,stock_quantity)
-        ],
-    UPDATE: [
-        cart_item, 
-        "user"(name,email)(RLS),
-        ],
-    DELETE: [cart_item],
-}
-
--- VIEWS 
+-------- VIEWS --------
 customer_cart(id,product_name,quantity)
 customer_order(date,order_number,no_items,price)
 

@@ -18,9 +18,8 @@ export const checkPreExistingEmail = async (req, res, next) => {
         if (rows.length > 0) {
             return res.status(400).json({ message: 'The email you have input already belongs to another account. Please try again.' });
         }
+        next();
     } catch (error) {
         return res.status(500).json({ message: 'Internal server error' });
     }
-
-    next();
 }
