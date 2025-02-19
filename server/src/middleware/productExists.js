@@ -1,23 +1,27 @@
 import { employee_pool } from "../config/db.js";
 
 export const checkProductExists = async (req, res, next) => {
-    // previous middlware has ensured: token authorized 
-    let errors = []
+    // Assuming token authorization is handled in previous middleware
+    const { id } = req.body;
+
+    // Check if product ID is provided
+    if (!id) {
+        return res.status(400).json({ message: 'Product ID is required' });
+    }
 
     try {
-        let params = [];
+        // Query to check if product exists in the database
         const userQuery = `SELECT * FROM public.product WHERE id = $1;`;
-        const { rows } = await employee_pool.query(userQuery);
+        const { rows } = await employee_pool.query(userQuery, [id]);
 
-        if (rows.length === 0) {    return res.status(404).json({ message: 'User not found' });   };
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
 
-        const product = rows[0];
+        const { id, name, description, price, stock_quantity } = rows[0];
 
-        if (!product.name) {
-            // TODO: add error to list and send altogether to user when finished
-        };
-
-        req.user = {id: profile.id, firstname: profile.firstname, lastname: profile.lastname, email: profile.email};
+        // Set product details in req.products
+        req.products = { id, name, description, price, stock_quantity };
 
         next();
     } catch (err) {

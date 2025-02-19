@@ -1,5 +1,5 @@
 import { customer_pool } from '../config/db.js'; 
-import { setAppCurrentUser, resetAppCurrentUser } from '../middleware/rlsProtectedQuery.js';
+import { setAppCurrentUser, resetAppCurrentUser } from '../util/rlsProtectedQuery.js';
 
 // ------------------ DELETE ------------------
 export const deleteProfile = async (req, res) => {
@@ -73,31 +73,13 @@ export const updateProfile = async (req, res) => {
 };
 
 // ------------------ GET ------------------
-export const getProfile = async (req, res) => {
-    const email = res.locals.user.email;
-    if (!email) {   throw new Error("Missing res.locals.user.email");   };
+export const getProfile = (req, res) => {
+    const returnFields = ["id", "firstname", "lastname", "email", "created_at"];
+    
+    const profile = Object.fromEntries(
+        Object.entries(req.user).filter(([key]) => returnFields.includes(key))
+    );
 
-    try {
-        await setAppCurrentUser(email); // Set session variable
-
-        const userQuery = `SELECT firstname, lastname, email FROM public."user" WHERE email = current_setting('app.current_user');`;
-        const { rows } = await customer_pool.query(userQuery);
-
-        if (rows.length === 0) {
-            return res.status(404).json({ message: 'User not found' });
-        };
-
-        const profile = rows[0];
-
-        if (!profile.firstname || !profile.lastname || !profile.email) {
-            return res.status(400).json({ message: 'Missing profile information in database' });
-        };
-
-        res.json({ message: 'Profile request successful', profile });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Internal Server Error' });
-    } finally {
-        await resetAppCurrentUser(); // Ensure cleanup even in case of an error
-    }
+    res.json({ message: 'Profile request successful', profile });
 };
+

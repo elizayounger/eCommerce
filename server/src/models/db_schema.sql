@@ -16,7 +16,6 @@ DROP TABLE IF EXISTS public."order";
 DROP TABLE IF EXISTS public."user";
 DROP TABLE IF EXISTS public.product;
 
-
 -- "user" Table
 DROP TABLE IF EXISTS public."user";
 CREATE TABLE public."user" (
@@ -116,3 +115,18 @@ INSERT INTO public.payment (order_id, payment_status, transaction_id, paid_at) V
 (1, 'completed', 'TXN123456', NOW()),
 (2, 'completed', 'TXN789012', NOW()),
 (3, 'pending', 'TXN345678', NOW());
+
+
+INSERT INTO product (name, description, price, stock_quantity) VALUES
+('Laptop', 'A high-performance laptop', 1200.00, 50),
+('Headphones', 'Noise-canceling headphones', 150.00, 100),
+('Smartphone', 'Latest model smartphone', 800.00, 30);
+
+
+-- Inserting sample cart items for each user
+INSERT INTO cart_item (user_id, product_id, quantity) VALUES
+(1, 4, 1),
+(1, 5, 2),
+(2, 6, 1)
+(2, 7, 1), 
+(3, 8, 3); 

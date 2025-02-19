@@ -22,15 +22,14 @@ import {                                                               // middle
 import { authenticateToken } from './middleware/authenticateToken.js';  // middleware
 import { saltHashPassword } from './middleware/saltHashPassword.js'; // middleware
 import { checkPreExistingEmail } from './middleware/checkDuplicateEmail.js'; // middleware
-import { checkProfileExists } from './middleware/profileExists.js'; // middleware
-import { authoriseEmployee } from './middleware/authoriseEmployee.js'; // middleware
 import { checkProductExists } from './middleware/productExists.js'; // middleware
 
 import { loadProducts } from './routes/home.js'; 
 import { registerUser } from './routes/register.js';
 import { verifyUserCredentials } from './routes/login.js';
 import { getProfile, updateProfile, deleteProfile } from './routes/profile.js';
-import { addProducts, updateProducts } from './routes/products.js';
+import { addProducts, updateProducts, deleteProducts } from './routes/products.js';
+import { loadCart, addToCart } from './routes/cart.js';
 
 // --------------------- ROUTES ---------------------
 
@@ -42,21 +41,21 @@ app.post('/login', validateLogin, verifyUserCredentials);
 
 app.get('/profile', authenticateToken, getProfile);
 
-app.put('/profile', authenticateToken, checkProfileExists, checkPreExistingEmail, validateProfile, saltHashPassword, updateProfile);
+app.put('/profile', authenticateToken, checkPreExistingEmail, validateProfile, saltHashPassword, updateProfile);
 
-app.delete('/profile', authenticateToken, checkProfileExists, validateLogin, deleteProfile);
+app.delete('/profile', authenticateToken, validateLogin, deleteProfile);
 
-app.post('/products', authenticateToken, authoriseEmployee, validateAddProducts, addProducts);
+//  TODO: Taken away authorise employee so need to do that check before doing these product endpoints
+app.post('/products', authenticateToken, validateAddProducts, addProducts);
 
-app.put('/products', authenticateToken, authoriseEmployee, validateUpdateProducts, updateProducts);
+app.put('/products', authenticateToken, validateUpdateProducts, updateProducts);
 
-app.delete('/products', authenticateToken, authoriseEmployee, validateDeleteProducts, checkProductExists, deleteProducts);
+app.delete('/products', authenticateToken, validateDeleteProducts, deleteProducts);
 
-// TODO: app.post('/cart', authenticateToken, checkProfileExists );
+app.get('/cart', authenticateToken, loadCart);
 
-// TODO: app.put('/cart', authenticateToken, checkProfileExists );
+app.post('/cart', authenticateToken, checkProductExists, addToCart);
 
-// TODO: app.delete('/cart', authenticateToken, checkProfileExists );
 
 // --------------------- SERVER SETUP ---------------------
 

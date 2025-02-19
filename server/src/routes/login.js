@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import { customer_pool } from '../config/db.js'; 
 import { generateToken } from '../config/jwt.js';
-import { setAppCurrentUser, resetAppCurrentUser } from '../middleware/rlsProtectedQuery.js';
+import { setAppCurrentUser, resetAppCurrentUser } from '../util/rlsProtectedQuery.js';
 
 export const verifyUserCredentials = async (req, res) => {
     const { email, password } = req.body;
@@ -15,21 +15,15 @@ export const verifyUserCredentials = async (req, res) => {
         const { rows } = await customer_pool.query(userQuery);
 
         // if nothing returned throw error
-        if (rows.length === 0) {   
-            return res.status(401).json({ message: 'Invalid email or password or server issue' });   
-        }
+        if (rows.length === 0) {   return res.status(401).json({ message: 'Invalid email or password or server issue' });   }
         
         // if nothing returned throw error cont.
         const user = rows[0];
-        if (!user.password) {   
-            return res.status(401).json({ message: 'password not in returned db_result' });   
-        };
+        if (!user.password) {   return res.status(401).json({ message: 'password not in returned db_result' });   };
 
         // Check password matches
         const isMatch = await bcrypt.compare(password, user.password); 
-        if (!isMatch) {   
-            return res.status(401).json({ message: 'Invalid email or password' });   
-        };
+        if (!isMatch) {   return res.status(401).json({ message: 'Invalid email or password' });   };
 
         // Generate JWT
         const token = generateToken(email);
