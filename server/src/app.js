@@ -41,18 +41,17 @@ app.post('/login', validateLogin, verifyUserCredentials);
 
 app.get('/profile', authenticateToken, getProfile);
 
-app.put('/profile', authenticateToken, checkPreExistingEmail, validateProfile, saltHashPassword, updateProfile);
+app.put('/profile', authenticateToken, checkPreExistingEmail, validateProfile, saltHashPassword, updateProfile); //TODO: '/profile/:id'
 
-app.delete('/profile', authenticateToken, validateLogin, deleteProfile);
+app.delete('/profile', authenticateToken, validateLogin, deleteProfile); //TODO:                                          '/profile/:id'
 
-//  TODO: Taken away authorise employee so need to do that check before doing these product endpoints
-app.post('/products', authenticateToken, validateAddProducts, addProducts);
+app.post('/products', authenticateToken, validateAddProducts, addProducts); // TODO: ensure employee
 
-app.put('/products', authenticateToken, validateUpdateProducts, updateProducts);
+app.put('/products', authenticateToken, validateUpdateProducts, updateProducts); // TODO: ensure employee &                '/products/:id'
 
-app.delete('/products', authenticateToken, validateDeleteProducts, deleteProducts);
+app.delete('/products', authenticateToken, validateDeleteProducts, deleteProducts); // TODO: ensure employee &             '/products/:id'
 
-app.get('/cart', authenticateToken, loadCart);
+app.get('/cart', authenticateToken, loadCart); // TODO: '/cart/:id'
 
 app.post('/cart', authenticateToken, checkProductExists, addToCart);
 
