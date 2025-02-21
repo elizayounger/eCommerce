@@ -2,7 +2,11 @@ import { employee_pool } from '../config/db.js';
 
 // ------------------ DELETE ------------------
 export const deleteProducts = async (req, res) => {
-    // Middleware has ensured: token authorized, employee authorized, req.body validated & sanitized
+    // Middleware has ensured: token authorized, profile retrieved, req.body validated & sanitized
+    
+    if (req.user.role !== 'employee') {
+        res.status(401).json({message: "Unauthorized Request. Employees only"});
+    }
 
     try {
         const productIds = req.body.map(product => product.id);
@@ -48,10 +52,13 @@ export const deleteProducts = async (req, res) => {
     }
 };
 
-
 // ------------------ PUT ------------------
 export const updateProducts = async (req, res) => {
-    // Middleware has ensured: token authorized, employee authorized, req.body validated & sanitized
+    // Middleware has ensured: token authorized, profile retrieved, req.body validated & sanitized
+    if (req.user.role !== 'employee') {
+        res.status(401).json({message: "Unauthorized Request. Employees only"});
+    }
+
     let errors = [];
 
     try {
@@ -123,7 +130,10 @@ export const updateProducts = async (req, res) => {
 
 // ------------------ POST ------------------
 export const addProducts = async (req, res) => {
-    // Middleware has ensured: token authorized, employee authorized, req.body validated & sanitized
+    // Middleware has ensured: token authorized, profile retrieved, req.body validated & sanitized
+    if (req.user.role !== 'employee') {
+        res.status(401).json({message: "Unauthorized Request. Employees only"});
+    }
 
     try {
         const inserts = [];

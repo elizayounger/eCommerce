@@ -56,7 +56,6 @@ app.get('/cart', authenticateToken, loadCart);
 
 app.post('/cart', authenticateToken, checkProductExists, addToCart);
 
-
 // --------------------- SERVER SETUP ---------------------
 
 const PORT =  process.env.SERVER_PORT || 3000; 

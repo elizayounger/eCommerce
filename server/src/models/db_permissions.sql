@@ -1,53 +1,47 @@
--------- CREATE ROLES -------- (SUPERUSER, CREATEROLE, CREATEDB, LOGIN)
+-------- CREATE SUPERUSER -------- (SUPERUSER, CREATEROLE, CREATEDB, LOGIN)
 
--- Admin: An admin could view, create, edit, and delete both products and orders, as well as manage "user" roles.
 CREATE ROLE admin WITH SUPERUSER LOGIN;
 GRANT admin TO elizayounger;
 
--------- EMPLOYEE PERMISSIONS --------
+-------- TABLE ROLE PERMISSIONS --------
+-- DB
+CREATE ROLE use_db;
+GRANT CONNECT ON DATABASE ecommerce TO use_db; 
+GRANT USAGE ON SCHEMA public TO use_db; 
 
-CREATE ROLE employee;
-GRANT CONNECT ON DATABASE ecommerce TO employee; -- Allow it to connect to the database
-GRANT USAGE ON SCHEMA public TO employee; 
+-- USER
+CREATE ROLE read_user;
+GRANT USAGE, SELECT ON public."user" TO read_user;
+CREATE ROLE write_user;
+GRANT USAGE, SELECT, INSERT, UPDATE, DELETE ON public."user" TO write_user;
+GRANT USAGE, SELECT ON SEQUENCE public.user_id_seq TO read_user;
+GRANT USAGE, SELECT ON SEQUENCE public.user_id_seq TO write_user;
+REVOKE ALL ON public."user" FROM PUBLIC;
+ALTER TABLE public."user" ENABLE ROW LEVEL SECURITY;
 
-CREATE USER employee_user WITH PASSWORD 'password'; -- Create the shared database user
-GRANT employee TO employee_user;
-
--- Grant access to customer_user on necessary tables:
-GRANT SELECT, INSERT, UPDATE, DELETE ON public."user" TO employee;
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.product TO employee;
-GRANT USAGE, SELECT ON SEQUENCE public.product_id_seq TO employee;
-GRANT USAGE, SELECT ON SEQUENCE public.user_id_seq TO employee; -- allows customer_user to select autoincrement
-GRANT USAGE ON SCHEMA pg_catalog TO employee; -- allow customer_user to set app.customer_user
-
---- EMPLOYEE POLICYS ---
-
-CREATE POLICY select_all_users
+CREATE POLICY select_own_user -- only access own account
 ON public."user"
-FOR SELECT
-TO employee_user
-USING (true);
+FOR ALL
+USING (email = current_setting('app.current_user')::text);
 
+CREATE POLICY insert_user -- only insert emails into email column
+ON public."user"
+FOR INSERT
+WITH CHECK (email LIKE '%@%.%');
 
--------- CUSTOMER PERMISSIONS --------
+-- PRODUCT
+CREATE ROLE read_product;
+GRANT USAGE, SELECT ON public.product TO read_product;
+CREATE ROLE write_product;
+GRANT USAGE, SELECT, INSERT, UPDATE, DELETE ON public.product TO write_product;
+GRANT SELECT ON SEQUENCE public.product_id_seq TO read_product;
+GRANT SELECT ON SEQUENCE public.product_id_seq TO write_product;
+REVOKE ALL ON public.product FROM PUBLIC;
 
--- customer_user: A customer would only be able to view products, create orders and make payments.
-CREATE USER customer_user WITH PASSWORD 'password'; -- Create the shared database user
-GRANT CONNECT ON DATABASE ecommerce TO customer_user; -- Allow it to connect to the database
-GRANT USAGE ON SCHEMA public TO customer_user; 
-
--- Grant access to customer_user on necessary tables:
-GRANT SELECT, INSERT ON public."user" TO customer_user;
-GRANT SELECT ON public.product TO customer_user;
-GRANT USAGE, SELECT ON SEQUENCE public.user_id_seq TO customer_user; -- allows customer_user to select autoincrement
-GRANT USAGE ON SCHEMA pg_catalog TO customer_user; -- allow customer_user to set app.customer_user
-GRANT EXECUTE ON FUNCTION pg_catalog.set_config(text, text, boolean) TO customer_user; -- ''
-
-
--------- POLICYS & RLS --------
-
---CART_ITEM TABLE RLS --
-
+-- CART_ITEM
+CREATE ROLE write_cart_item;
+GRANT USAGE, SELECT, INSERT, UPDATE, DELETE ON public.cart_item TO write_cart_item;
+REVOKE ALL ON public.cart_item FROM PUBLIC;
 ALTER TABLE cart_item ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY user_cart_policy 
@@ -55,48 +49,58 @@ ON cart_item
 FOR ALL 
 USING (user_id = current_setting('app.current_user')::integer);
 
-GRANT SELECT, UPDATE, DELETE ON cart_item TO public;
+-- ORDER
+CREATE ROLE read_order;
+GRANT USAGE, SELECT ON public.order TO read_order;
+REVOKE ALL ON public.order FROM PUBLIC;
 
+-- ORDER_ITEM
+CREATE ROLE read_order_item;
+GRANT USAGE, SELECT ON public.order_item TO read_order_item;
+REVOKE ALL ON public.order_item FROM PUBLIC;
 
---USER TABLE RLS --
+-- CUSTOMER_CART
+CREATE ROLE read_customer_cart;
+GRANT SELECT ON customer_cart TO read_customer_cart;
+REVOKE ALL ON customer_cart FROM PUBLIC;
 
--- Enable Row-Level Security on the user table
-ALTER TABLE public."user" ENABLE ROW LEVEL SECURITY;
+-- CUSTOMER_ORDER
+CREATE ROLE read_customer_order;
+GRANT SELECT ON customer_order TO read_customer_order;
+REVOKE ALL ON customer_order FROM PUBLIC;
 
--- Allow users to SELECT (view) only their own row
-CREATE POLICY select_own_user
+-------- EMPLOYEE ROLE --------
+CREATE ROLE employee;
+GRANT use_db TO employee;
+GRANT read_user TO employee;
+GRANT write_product TO employee;
+
+CREATE POLICY select_all_users
 ON public."user"
-FOR ALL
-USING (email = current_setting('app.current_user')::text);
+FOR SELECT
+TO employee
+USING (true);
 
-CREATE POLICY insert_user
-ON public."user"
-FOR INSERT
-WITH CHECK (email LIKE '%@%.%');
+-------- CUSTOMER ROLE --------
+CREATE ROLE customer;
+GRANT use_db TO customer;
+GRANT write_user TO customer;
+GRANT read_product TO customer;
+GRANT write_cart_item TO customer;
+GRANT read_order TO customer;
+GRANT read_order_item TO customer;
+GRANT read_customer_cart TO customer;
+GRANT read_customer_order TO customer;
 
+-------- USERS --------
+CREATE ROLE employee_user WITH PASSWORD 'password'; -- TODO: CHANGE PASSWORD
+GRANT employee TO employee_user;
 
--------- VIEWS --------
-customer_cart(id,product_name,quantity)
-customer_order(date,order_number,no_items,price)
-
--- TABLES 
-cart_item(user_id,product_id,quantity)
-order_item(order_id,product_id,quantity)
-payment(id,order_id,payment_status,transaction_id,paid_at)
-"order"(id,user_id,order_date,total_price)
-"user"(id,name,email,role,created_at)
-product(id,name,description,price,stock_quantity)
-
--- TABLE PRIVILEGES
-INSERT
-SELECT
-UPDATE
-DELETE
-TRUNCATE
-REFERENCES
-TRIGGER
+CREATE USER customer_user WITH PASSWORD 'password'; -- TODO: CHANGE PASSWORD
+GRANT customer TO customer_user;
 
 -------------------- CHECKS --------------------
+
 -- checks user has access to database
 SELECT datname, rolname, has_database_privilege(rolname, datname, 'CONNECT') AS has_connect 
 FROM pg_database, pg_roles
@@ -106,3 +110,7 @@ WHERE datname = 'ecommerce' AND rolname = 'customer_user';
 select * from information_schema.role_table_grants rtg
 where grantee = 'customer_user';
 
+-- check what roles havve been assigned to users
+SELECT grantee, information_schema.applicable_roles.role_name -- see what employee has grants for
+FROM information_schema.applicable_roles
+WHERE grantee = 'employee';
