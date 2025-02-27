@@ -2,6 +2,10 @@
 import dotenv from 'dotenv';
 import express from 'express';
 import { connectDB } from './config/db.js'; // Import db config settings
+// TODO: add cors
+// TODO: add config.db controlling who db accepts connection requests from 
+// TODO: change port number from default
+// TODO: ensure csrf protected
 
 dotenv.config();
 
@@ -41,19 +45,19 @@ app.post('/login', validateLogin, verifyUserCredentials);
 
 app.get('/profile', authenticateToken, getProfile);
 
-app.put('/profile', authenticateToken, checkPreExistingEmail, validateProfile, saltHashPassword, updateProfile); //TODO: '/profile/:id'
+app.put('/profile', authenticateToken, checkPreExistingEmail, validateProfile, saltHashPassword, updateProfile); 
 
-app.delete('/profile', authenticateToken, validateLogin, deleteProfile); //TODO:                                          '/profile/:id'
+app.delete('/profile', authenticateToken, validateLogin, deleteProfile); 
 
-app.post('/products', authenticateToken, validateAddProducts, addProducts); // TODO: ensure employee
+app.post('/products', authenticateToken, validateAddProducts, addProducts); 
 
-app.put('/products', authenticateToken, validateUpdateProducts, updateProducts); // TODO: ensure employee &                '/products/:id'
+app.put('/products', authenticateToken, validateUpdateProducts, updateProducts);
 
-app.delete('/products', authenticateToken, validateDeleteProducts, deleteProducts); // TODO: ensure employee &             '/products/:id'
+app.delete('/products', authenticateToken, validateDeleteProducts, deleteProducts);
 
-app.get('/cart', authenticateToken, loadCart); // TODO: '/cart/:id'
+app.get('/cart', authenticateToken, loadCart); 
 
-app.post('/cart', authenticateToken, checkProductExists, addToCart);
+// app.post('/cart', authenticateToken, checkProductExists, addToCart);
 
 // --------------------- SERVER SETUP ---------------------
 

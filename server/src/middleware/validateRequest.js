@@ -36,7 +36,9 @@ export const validateDeleteProducts = [
        const extraFields = req.body.flatMap((product, index) =>
            Object.keys(product).filter(key => !allowedFields.includes(key)).map(key => `Product ${index + 1}: ${key}`)
        );
+       
        if (extraFields.length > 0) {  return res.status(400).json({ message: `Unrecognized field(s): ${extraFields.join(", ")}` });   }
+       if (req.user.role !== 'employee') {  res.status(401).json({message: `Unauthorized. Employees only`})   }
 
        // Check for validation errors
        const errors = validationResult(req);
@@ -60,7 +62,9 @@ export const validateUpdateProducts = [
         const extraFields = req.body.flatMap((product, index) =>
             Object.keys(product).filter(key => !allowedFields.includes(key)).map(key => `Product ${index + 1}: ${key}`)
         );
+
         if (extraFields.length > 0) {  return res.status(400).json({ message: `Unrecognized field(s): ${extraFields.join(", ")}` });   }
+        if (req.user.role !== 'employee') {  res.status(401).json({message: `Unauthorized. Employees only`})   }
 
         // Check for validation errors
         const errors = validationResult(req);
@@ -72,7 +76,6 @@ export const validateUpdateProducts = [
 
 export const validateAddProducts = [
     body().isArray().withMessage("Request body must be an array of products"),
-
     body("*.name").trim().escape().notEmpty().withMessage("Name is required"),
     body("*.description").trim().escape().notEmpty().withMessage("Description is required"),
     body("*.price").isFloat({ gt: 0 }).withMessage("Price must be a positive number"),
@@ -81,10 +84,11 @@ export const validateAddProducts = [
     (req, res, next) => {
         const allowedFields = ["name", "description", "price", "stock_quantity"];
 
-        const extraFields = req.body.flatMap((product, index) =>
+        const extraFields = req.body.flatMap((product, index) => 
             Object.keys(product).filter(key => !allowedFields.includes(key)).map(key => `Product ${index + 1}: ${key}`)
         );
 
+        if (req.user.role !== 'employee') {  res.status(401).json({message: `Unauthorized. Employees only`})   }
         if (extraFields.length > 0) {  return res.status(400).json({ message: `Unrecognized field(s): ${extraFields.join(", ")}` });   }
 
         const errors = validationResult(req);
@@ -130,7 +134,6 @@ export const validateLogin = [
    body('email').trim().isEmail().normalizeEmail().withMessage('Invalid email address'),
    body('password').notEmpty().withMessage('Password required')
       .isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-      //  .matches(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/).withMessage('Password must be at least 6 characters, with at least one letter and one number')
  
    (req, res, next) => {
  

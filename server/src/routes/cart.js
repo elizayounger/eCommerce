@@ -7,16 +7,14 @@ export const addToCart = async (req, res, next) => {
     try {
         setAppCurrentUser(email);
         
-        // Using parameterized query to fetch user-specific cart items
         const sqlQuery = `
             SELECT product_name, quantity, cart_total 
             FROM customer_cart 
-            WHERE user_id = $1
-            ORDER BY 1;`;
-        const result = await customer_pool.query(sqlQuery, [req.user.id]);
+            WHERE user_id = $1;`;
+        const rows = await customer_pool.query(sqlQuery, [req.user.id]);
 
-        // Send the cart data to the client
-        res.json(result.rows);
+        if (!rows.length > 0) {   return res.json({message: `No items in user cart`})  }
+        return res.json(rows);
 
     } catch (err) {
         console.error(err);
@@ -32,16 +30,14 @@ export const loadCart = async (req, res, next) => {
     try {
         setAppCurrentUser(email);
         
-        // Using parameterized query to fetch user-specific cart items
         const sqlQuery = `
             SELECT product_name, quantity, cart_total 
             FROM customer_cart 
-            WHERE user_id = $1
-            ORDER BY 1;`;
-        const result = await customer_pool.query(sqlQuery, [req.user.id]);
+            WHERE user_id = $1;`;
+        const rows = await customer_pool.query(sqlQuery, [req.user.id]);
 
-        // Send the cart data to the client
-        res.json(result.rows);
+        if (!rows.length > 0) {   return res.json({message: `No items in user cart`})  }
+        return res.json(rows);
 
     } catch (err) {
         console.error(err);

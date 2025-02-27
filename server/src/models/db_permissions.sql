@@ -42,32 +42,37 @@ REVOKE ALL ON public.product FROM PUBLIC;
 CREATE ROLE write_cart_item;
 GRANT USAGE, SELECT, INSERT, UPDATE, DELETE ON public.cart_item TO write_cart_item;
 REVOKE ALL ON public.cart_item FROM PUBLIC;
-ALTER TABLE cart_item ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.cart_item ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY user_cart_policy 
-ON cart_item 
-FOR ALL 
-USING (user_id = current_setting('app.current_user')::integer);
+CREATE POLICY select_own_cart_items
+ON public.cart_item
+FOR SELECT
+USING (user_id = (SELECT id FROM public."user" WHERE email = current_setting('app.current_user')::text));
+
 
 -- ORDER
 CREATE ROLE read_order;
 GRANT USAGE, SELECT ON public.order TO read_order;
 REVOKE ALL ON public.order FROM PUBLIC;
+-- TODO: own_order policy
 
 -- ORDER_ITEM
 CREATE ROLE read_order_item;
 GRANT USAGE, SELECT ON public.order_item TO read_order_item;
 REVOKE ALL ON public.order_item FROM PUBLIC;
+-- TODO: own_order_item policy
 
--- CUSTOMER_CART
+-- CUSTOMER_CART (VIEW - read only. Any cart changes are made to cart_item)
 CREATE ROLE read_customer_cart;
 GRANT SELECT ON customer_cart TO read_customer_cart;
 REVOKE ALL ON customer_cart FROM PUBLIC;
+-- TODO: own_cart policy
 
 -- CUSTOMER_ORDER
 CREATE ROLE read_customer_order;
 GRANT SELECT ON customer_order TO read_customer_order;
 REVOKE ALL ON customer_order FROM PUBLIC;
+-- TODO: own_cart_item policy
 
 -------- EMPLOYEE ROLE --------
 CREATE ROLE employee;
@@ -101,16 +106,21 @@ GRANT customer TO customer_user;
 
 -------------------- CHECKS --------------------
 
--- checks user has access to database
+-- checks user access to database
 SELECT datname, rolname, has_database_privilege(rolname, datname, 'CONNECT') AS has_connect 
 FROM pg_database, pg_roles
 WHERE datname = 'ecommerce' AND rolname = 'customer_user';
 
--- checks what grants the customer_user has on tables
+-- checks grants 
 select * from information_schema.role_table_grants rtg
 where grantee = 'customer_user';
 
--- check what roles havve been assigned to users
+-- check roles assigned to users
 SELECT grantee, information_schema.applicable_roles.role_name -- see what employee has grants for
 FROM information_schema.applicable_roles
 WHERE grantee = 'employee';
+
+-- check policies
+SELECT * 
+FROM pg_policies 
+WHERE tablename = 'cart_item';

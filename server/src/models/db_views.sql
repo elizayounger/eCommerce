@@ -10,7 +10,6 @@ JOIN public."user" AS "user" ON cart.user_id = "user".id
 JOIN public.product AS product ON product.id = cart.product_id
 GROUP BY "user".id, product.name, cart.quantity;
 
-GRANT SELECT ON customer_cart TO customer_user;
 
 -- CUSTOMER ORDERS VIEW
 CREATE VIEW customer_order AS
@@ -23,4 +22,3 @@ FROM public."order" AS "order"
 JOIN public.order_item AS order_item ON "order".id = order_item.order_id
 GROUP BY 2
 ORDER BY 1;
-
