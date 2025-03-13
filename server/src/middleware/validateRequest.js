@@ -23,8 +23,6 @@ export const validateAddToCart = [
    }
 ];
 
-
-
 export const validateDeleteProduct = [
    body("id").isInt({ min: 1 }).withMessage("Product ID must be a positive integer"),
    body("name").trim().escape().notEmpty().withMessage("Name cannot be empty"),

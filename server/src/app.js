@@ -32,13 +32,14 @@ import { authenticateToken } from './middleware/authenticateToken.js';  // middl
 import { saltHashPassword } from './middleware/saltHashPassword.js'; // middleware
 import { checkPreExistingEmail } from './middleware/checkDuplicateEmail.js'; // middleware
 import { checkProductExists } from './util/productExists.js'; // middleware
+import { assertCartItem } from './util/checkUserCart.js'; // middleware
 
 import { loadProducts } from './routes/home.js'; 
 import { registerUser } from './routes/register.js';
 import { verifyUserCredentials } from './routes/login.js';
 import { getProfile, updateProfile, deleteProfile } from './routes/profile.js';
 import { addProduct, updateProduct, deleteProduct } from './routes/products.js';
-import { loadCart, addToCart } from './routes/cart.js';
+import { loadCart, addToCart, updateCart } from './routes/cart.js';
 import { finalHandler } from './util/finalHandler.js';
 
 // --------------------- ROUTES ---------------------
@@ -64,6 +65,8 @@ app.delete('/products', authenticateToken, validateDeleteProduct, checkProductEx
 app.get('/cart/', authenticateToken, loadCart, finalHandler); 
 
 app.post('/cart', authenticateToken, validateAddToCart, checkProductExists, addToCart, finalHandler);
+
+app.put('/cart', authenticateToken, validateAddToCart, checkProductExists, assertCartItem, updateCart, finalHandler);
 
 // --------------------- SERVER SETUP ---------------------
 
