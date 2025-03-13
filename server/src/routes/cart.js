@@ -14,6 +14,7 @@ export const addToCart = async (req, res, next) => {
         const rows = await customer_pool.query(sqlQuery, [req.user.id]);
 
         if (!rows.length > 0) {   return res.json({message: `No items in user cart`})  }
+        
         return res.json(rows);
 
     } catch (err) {
@@ -25,6 +26,7 @@ export const addToCart = async (req, res, next) => {
 };
 
 export const loadCart = async (req, res, next) => {
+    // middleware has already: authenticated token, fetched user and saved in req.user, initialised res.locals.response
     const email = res.locals.user.email;
 
     try {
@@ -34,10 +36,13 @@ export const loadCart = async (req, res, next) => {
             SELECT product_name, quantity, cart_total 
             FROM customer_cart 
             WHERE user_id = $1;`;
-        const rows = await customer_pool.query(sqlQuery, [req.user.id]);
+        const { rows } = await customer_pool.query(sqlQuery, [req.user.id]);
 
         if (!rows.length > 0) {   return res.json({message: `No items in user cart`})  }
-        return res.json(rows);
+        
+        res.locals.response.cart = rows;
+
+        return next();
 
     } catch (err) {
         console.error(err);

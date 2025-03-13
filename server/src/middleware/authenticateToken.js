@@ -29,6 +29,7 @@ export const authenticateToken = async (req, res, next) => {
 
         req.user = user[0];
         res.locals.user = decoded; // Store user info for further middleware use
+        res.locals.response = {}; 
 
         next();
     } catch (err) {

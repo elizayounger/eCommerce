@@ -35,7 +35,8 @@ CREATE TABLE public.product (
     name VARCHAR NOT NULL,
     description TEXT,
     price NUMERIC(10,2) NOT NULL,
-    stock_quantity INTEGER NOT NULL CHECK (stock_quantity >= 0)
+    stock_quantity INTEGER NOT NULL CHECK (stock_quantity >= 0),
+    CONSTRAINT uq_product UNIQUE (name, description)
 );
 
 -- Cart Item Table (Many-to-Many between "user" and Product)
