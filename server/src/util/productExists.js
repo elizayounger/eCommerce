@@ -2,9 +2,7 @@ import { employee_pool } from "../config/db.js";
 
 export const checkProductExists = async (req, res, next) => {
     // Assuming token authorization is handled in previous middleware
-    const { id: product_id } = req.body;
-
-    if (!product_id) {  return res.status(400).json({ message: 'Product ID is required' }); }
+    const { product_id } = req.body;
 
     try {
         const userQuery = `SELECT * FROM public.product WHERE id = $1;`;

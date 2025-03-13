@@ -49,21 +49,21 @@ app.post('/register', validateRegister, saltHashPassword, registerUser);
 
 app.post('/login', validateLogin, verifyUserCredentials);
 
-app.get('/profile', authenticateToken, getProfile); // TODO: '/:id'
+app.get('/profile', authenticateToken, getProfile); 
 
-app.put('/profile', authenticateToken, checkPreExistingEmail, validateProfile, saltHashPassword, updateProfile); // TODO: '/:id'
+app.put('/profile', authenticateToken, checkPreExistingEmail, validateProfile, saltHashPassword, updateProfile); 
 
-app.delete('/profile', authenticateToken, validateLogin, deleteProfile); // TODO: '/:id'
+app.delete('/profile', authenticateToken, validateLogin, deleteProfile); 
 
 app.post('/products', authenticateToken, validateAddProduct, addProduct, finalHandler);
 
-app.put('/products', authenticateToken, validateUpdateProduct, checkProductExists, updateProduct, finalHandler); // TODO: '/:id'
+app.put('/products', authenticateToken, validateUpdateProduct, checkProductExists, updateProduct, finalHandler); 
 
-app.delete('/products', authenticateToken, validateDeleteProduct, checkProductExists, deleteProduct, finalHandler); // TODO: '/:id'
+app.delete('/products', authenticateToken, validateDeleteProduct, checkProductExists, deleteProduct, finalHandler); 
 
-app.get('/cart/:id', authenticateToken, loadCart, finalHandler); // TODO: '/:id'
+app.get('/cart/', authenticateToken, loadCart, finalHandler); 
 
-// app.post('/cart', authenticateToken, validateAddToCart, checkProductExists, addToCart, finalHandler);
+app.post('/cart', authenticateToken, validateAddToCart, checkProductExists, addToCart, finalHandler);
 
 // --------------------- SERVER SETUP ---------------------
 

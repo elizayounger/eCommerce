@@ -1,25 +1,28 @@
 import { body, validationResult } from 'express-validator';
 
 export const validateAddToCart = [
-   body("id").trim().escape().notEmpty().withMessage("Name is required"),
-   body("quantity").isInt({ min: 0 }).withMessage("Item quantity must be a non-negative integer"),
+   body("product_id").trim().notEmpty().withMessage("Product ID is required"),
+   body("quantity").isInt({ min: 1 }).withMessage("Item quantity must be a positive integer"),
 
    (req, res, next) => {
-      const allowedFields = ["id", "quantity"];
+      const allowedFields = ["product_id", "quantity"];
 
-      const extraFields = req.body.map((product, index) => {
-         const invalidKeys = Object.keys(product).filter(key => !allowedFields.includes(key));
-         return invalidKeys.length ? `Product ${index + 1}: ${invalidKeys.join(", ")}` : null;
-      }).filter(Boolean); // Removes null entries
+      // Check for extra fields
+      const invalidKeys = Object.keys(req.body).filter(key => !allowedFields.includes(key));
+      if (invalidKeys.length > 0) {
+         return res.status(400).json({ message: `Unrecognized field(s): ${invalidKeys.join(", ")}` });
+      }
 
-      if (extraFields.length > 0) {  return res.status(400).json({ message: `Unrecognized field(s): ${extraFields.join("; ")}` });  }
-
+      // Validate required fields
       const errors = validationResult(req);
-      if (!errors.isEmpty()) {  return res.status(400).json({ errors: errors.array() });  }
+      if (!errors.isEmpty()) {
+         return res.status(400).json({ errors: errors.array() });
+      }
 
       next();
    }
 ];
+
 
 
 export const validateDeleteProduct = [
