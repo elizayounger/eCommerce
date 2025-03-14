@@ -1,22 +1,8 @@
 import { param, body, validationResult } from 'express-validator';
-
-export const validateDeleteFromCart = [
-   param("id").trim().notEmpty().matches(/^\d+$/).withMessage("Product ID is required")
-   .matches(/^\d+$/).withMessage("Product ID must contain only numbers"),
-
-   (req, res, next) => {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-         return res.status(400).json({ errors: errors.array() });
-      }
-
-      next();
-   }
-];
+import { validateProductIdParam } from './validateParams.js';
 
 export const validateUpdateCart = [
-   param("id").trim().notEmpty().matches(/^\d+$/).withMessage("Product ID is required")
-   .matches(/^\d+$/).withMessage("Product ID must contain only numbers"),
+   ...validateProductIdParam,
    body("quantity").isInt({ min: 1 }).withMessage("Item quantity must be a positive integer"),
 
    (req, res, next) => {
@@ -60,11 +46,11 @@ export const validateAddToCart = [
 ];
 
 export const validateDeleteProduct = [
-   body("id").isInt({ min: 1 }).withMessage("Product ID must be a positive integer"),
+   ...validateProductIdParam,
    body("name").trim().escape().notEmpty().withMessage("Name cannot be empty"),
 
    (req, res, next) => {
-      const allowedFields = ["id", "name"];
+      const allowedFields = ["name"];
       const extraFields = Object.keys(req.body).filter(key => !allowedFields.includes(key));
        
       if (req.user.role !== 'employee') {
@@ -82,14 +68,15 @@ export const validateDeleteProduct = [
 ];
 
 export const validateUpdateProduct = [
-   body("id").isInt({ min: 1 }).withMessage("Product ID must be a positive integer"),
+   param("id").trim().notEmpty().matches(/^\d+$/).withMessage("Product ID is required")
+   .matches(/^\d+$/).withMessage("Product ID must contain only numbers"),
    body("name").optional().trim().escape().notEmpty().withMessage("Name cannot be empty"),
    body("description").optional().trim().escape().notEmpty().withMessage("Description cannot be empty"),
    body("price").optional().isFloat({ gt: 0 }).withMessage("Price must be a positive number"),
    body("stock_quantity").optional().isInt({ min: 0 }).withMessage("Stock quantity must be a non-negative integer"),
 
    (req, res, next) => {
-      const allowedFields = ["id", "name", "description", "price", "stock_quantity"];
+      const allowedFields = ["name", "description", "price", "stock_quantity"];
       const extraFields = Object.keys(req.body).filter(key => !allowedFields.includes(key));
       
       if (extraFields.length > 0) {   return res.status(400).json({ message: `Unrecognized field(s): ${extraFields.join(", ")}` });   } 
