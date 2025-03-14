@@ -63,7 +63,7 @@ app.put('/products/:id', authenticateToken, validateUpdateProduct, checkProductE
 
 app.delete('/products/:id', authenticateToken, validateDeleteProduct, checkProductExists, deleteProduct, finalHandler); 
 
-app.get('/cart', authenticateToken, loadCart, finalHandler); // TODO add "/:id"
+app.get('/cart', authenticateToken, loadCart, finalHandler); 
 
 app.post('/cart', authenticateToken, validateAddToCart, checkProductExists, addToCart, finalHandler);
 
@@ -78,3 +78,4 @@ const PORT =  process.env.SERVER_PORT || 3000;
 app.listen(PORT, () => {
    console.log(`Server running on port ${PORT}`);
 });
+

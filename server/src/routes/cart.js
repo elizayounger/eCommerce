@@ -135,7 +135,7 @@ export const loadCart = async (req, res, next) => {
         setAppCurrentUser(email);
         
         const sqlQuery = `
-            SELECT product_name, quantity, cart_total 
+            SELECT product_id, product_name, quantity, cart_total 
             FROM customer_cart 
             WHERE user_id = $1;`;
         const { rows } = await customer_pool.query(sqlQuery, [req.user.id]);

@@ -2,13 +2,14 @@
 CREATE VIEW customer_cart AS
 SELECT 
     "user".id AS user_id,
+    product.id AS product_id,
     product.name AS product_name,
     cart.quantity AS quantity,
     SUM(product.price * cart.quantity) AS cart_total 
 FROM public.cart_item AS cart
 JOIN public."user" AS "user" ON cart.user_id = "user".id
 JOIN public.product AS product ON product.id = cart.product_id
-GROUP BY "user".id, product.name, cart.quantity;
+GROUP BY "user".id, product.id, product.name, cart.quantity;
 
 
 -- CUSTOMER ORDERS VIEW
