@@ -27,6 +27,7 @@ import {                                                               // middle
    validateUpdateProduct,
    validateDeleteProduct,
    validateAddToCart,
+   validateUpdateCart,
    validateDeleteFromCart
 } from './middleware/validateRequest.js';     
 import { authenticateToken } from './middleware/authenticateToken.js';  // middleware
@@ -67,7 +68,7 @@ app.get('/cart', authenticateToken, loadCart, finalHandler);
 
 app.post('/cart', authenticateToken, validateAddToCart, checkProductExists, addToCart, finalHandler);
 
-app.put('/cart/:id', authenticateToken, validateAddToCart, checkProductExists, assertCartItem, updateCart, finalHandler);
+app.put('/cart/:id', authenticateToken, validateUpdateCart, checkProductExists, assertCartItem, updateCart, finalHandler);
 
 app.delete('/cart/:id', authenticateToken, validateDeleteFromCart, checkProductExists, assertCartItem, deleteCartItem, finalHandler);
 

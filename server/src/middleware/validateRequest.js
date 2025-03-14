@@ -14,6 +14,28 @@ export const validateDeleteFromCart = [
    }
 ];
 
+export const validateUpdateCart = [
+   param("id").trim().notEmpty().matches(/^\d+$/).withMessage("Product ID is required")
+   .matches(/^\d+$/).withMessage("Product ID must contain only numbers"),
+   body("quantity").isInt({ min: 1 }).withMessage("Item quantity must be a positive integer"),
+
+   (req, res, next) => {
+      const allowedFields = ["quantity"];
+
+      // Check for extra fields
+      const invalidKeys = Object.keys(req.body).filter(key => !allowedFields.includes(key));
+      if (invalidKeys.length > 0) {
+         return res.status(400).json({ message: `Unrecognized field(s): ${invalidKeys.join(", ")}` });
+      }
+      // Validate required fields
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+         return res.status(400).json({ errors: errors.array() });
+      }
+      next();
+   }
+];
+
 export const validateAddToCart = [
    body("product_id").trim().notEmpty().withMessage("Product ID is required"),
    body("quantity").isInt({ min: 1 }).withMessage("Item quantity must be a positive integer"),
