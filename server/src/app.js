@@ -26,7 +26,8 @@ import {                                                               // middle
    validateAddProduct,
    validateUpdateProduct,
    validateDeleteProduct,
-   validateAddToCart
+   validateAddToCart,
+   validateDeleteFromCart
 } from './middleware/validateRequest.js';     
 import { authenticateToken } from './middleware/authenticateToken.js';  // middleware
 import { saltHashPassword } from './middleware/saltHashPassword.js'; // middleware
@@ -39,7 +40,7 @@ import { registerUser } from './routes/register.js';
 import { verifyUserCredentials } from './routes/login.js';
 import { getProfile, updateProfile, deleteProfile } from './routes/profile.js';
 import { addProduct, updateProduct, deleteProduct } from './routes/products.js';
-import { loadCart, addToCart, updateCart } from './routes/cart.js';
+import { loadCart, addToCart, updateCart, deleteCartItem } from './routes/cart.js';
 import { finalHandler } from './util/finalHandler.js';
 
 // --------------------- ROUTES ---------------------
@@ -58,15 +59,17 @@ app.delete('/profile', authenticateToken, validateLogin, deleteProfile);
 
 app.post('/products', authenticateToken, validateAddProduct, addProduct, finalHandler);
 
-app.put('/products', authenticateToken, validateUpdateProduct, checkProductExists, updateProduct, finalHandler); 
+app.put('/products/:id', authenticateToken, validateUpdateProduct, checkProductExists, updateProduct, finalHandler); 
 
-app.delete('/products', authenticateToken, validateDeleteProduct, checkProductExists, deleteProduct, finalHandler); 
+app.delete('/products/:id', authenticateToken, validateDeleteProduct, checkProductExists, deleteProduct, finalHandler); 
 
-app.get('/cart/', authenticateToken, loadCart, finalHandler); 
+app.get('/cart', authenticateToken, loadCart, finalHandler); // TODO add "/:id"
 
 app.post('/cart', authenticateToken, validateAddToCart, checkProductExists, addToCart, finalHandler);
 
-app.put('/cart', authenticateToken, validateAddToCart, checkProductExists, assertCartItem, updateCart, finalHandler);
+app.put('/cart/:id', authenticateToken, validateAddToCart, checkProductExists, assertCartItem, updateCart, finalHandler);
+
+app.delete('/cart/:id', authenticateToken, validateDeleteFromCart, checkProductExists, assertCartItem, deleteCartItem, finalHandler);
 
 // --------------------- SERVER SETUP ---------------------
 

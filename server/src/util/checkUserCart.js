@@ -5,7 +5,7 @@ export const assertCartItem = async (req, res, next) => {
     // middleware has authenticated token, validated request body, assertained product existence
     const email = res.locals.user.email;
     const user_id = req.user.id;
-    const { product_id } = req.body;
+    const { id } = req.params; // TODO: ensure all cart routes use query instead of body
 
     try {
         setAppCurrentUser(email);
@@ -16,9 +16,9 @@ export const assertCartItem = async (req, res, next) => {
 
         if (rowCount === 0) {   return res.status(404).json({   message: "User Cart empty, no item to update"   });     }
 
-        let item_found = rows.some(cart_item => cart_item.product_id.toString() === product_id && cart_item.quantity > 0);
+        let item_found = rows.some(cart_item => cart_item.product_id.toString() === id && cart_item.quantity > 0);
 
-        if (!item_found) {   return res.status(404).json({ message: "User Cart item not found", rows: rows, product_id: product_id });   }
+        if (!item_found) {   return res.status(404).json({ message: "User Cart item not found", rows: rows, product_id: id });   }
 
         next();
 
