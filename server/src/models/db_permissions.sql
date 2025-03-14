@@ -74,6 +74,14 @@ GRANT SELECT ON customer_order TO read_customer_order;
 REVOKE ALL ON customer_order FROM PUBLIC;
 -- TODO: own_cart_item policy
 
+-- PAYMENT
+
+
+REVOKE ALL ON payment FROM public;
+
+GRANT SELECT, INSERT, UPDATE ON payment TO admin;
+GRANT SELECT ON payment TO customer_service;
+
 -------- EMPLOYEE ROLE --------
 CREATE ROLE employee;
 GRANT use_db TO employee;

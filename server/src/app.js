@@ -74,6 +74,16 @@ app.put('/cart/:id', authenticateToken, validateUpdateCart, checkProductExists, 
 
 app.delete('/cart/:id', authenticateToken, validateProductIdParam, checkProductExists, assertCartItem, deleteCartItem, finalHandler);
 
+app.post('/checkout', );
+// {
+//    "paymentMethodId": "pm_123456789",  
+//    "amount": 5000,  
+//    "currency": "USD",
+//    "saveCard": true
+//  }
+
+app.get('/orders', authenticateToken, loadOrders, finalHandler); 
+
 // --------------------- SERVER SETUP ---------------------
 
 const PORT =  process.env.SERVER_PORT || 3000; 

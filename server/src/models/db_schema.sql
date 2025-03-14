@@ -68,14 +68,20 @@ CREATE TABLE public.order_item (
     PRIMARY KEY(order_id, product_id)
 );
 
--- Payment Table (One-to-One with Order)
-DROP TABLE IF EXISTS public.payment;
 CREATE TABLE public.payment (
-    id SERIAL PRIMARY KEY,
-    order_id INTEGER UNIQUE REFERENCES "order"(id) ON DELETE CASCADE,
-    payment_status payment_status NOT NULL,
-    transaction_id VARCHAR UNIQUE NOT NULL,
-    paid_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id SERIAL PRIMARY KEY,                 
+    order_id INT NOT NULL REFERENCES "order"(id) ON DELETE CASCADE,  
+    user_id INT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,  
+    stripe_payment_intent_id VARCHAR(100) UNIQUE NOT NULL,  -- Stripe PaymentIntent ID
+    stripe_customer_id VARCHAR(100),       -- Stripe Customer ID (if saving card)
+    payment_method VARCHAR(50) NOT NULL,   -- Payment method (card, PayPal, etc.)
+    amount DECIMAL(10,2) NOT NULL,         
+    currency VARCHAR(10) DEFAULT 'USD',    
+    status VARCHAR(20) NOT NULL CHECK (status IN ('pending', 'completed', 'failed', 'refunded')),  
+    transaction_id VARCHAR(100) UNIQUE,    -- External transaction ID (if available)
+    receipt_url TEXT,                      -- Stripe receipt URL
+    created_at TIMESTAMP DEFAULT NOW(),    
+    updated_at TIMESTAMP DEFAULT NOW() ON UPDATE NOW() -- Last updated timestamp
 );
 
 
