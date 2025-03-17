@@ -44,18 +44,19 @@ import { checkPreExistingEmail } from './middleware/checkDuplicateEmail.js'; // 
 import { checkProductExists } from './util/productExists.js'; // middleware
 import { assertCartItem } from './util/checkUserCart.js'; // middleware
 import { validateProductIdParam } from './middleware/validateParams.js'; // middleware
-import { processPayment, webhookConfirmation } from '../src/routes/checkout/stripe.js';
+import { processPayment, webhookConfirmation } from './routes/checkout/payment.js';
 
 import { registerUser } from './routes/register.js';
 import { verifyUserCredentials } from './routes/login.js';
 import { getProfile, updateProfile, deleteProfile } from './routes/profile.js';
 import { loadProduct, loadProducts, addProduct, updateProduct, deleteProduct } from './routes/products.js';
 import { loadCart, addToCart, updateCart, deleteCartItem } from './routes/cart.js';
+import { addOrderPending, loadOrders } from './routes/orders/orders.js';
 import { finalHandler } from './util/finalHandler.js';
 
 
 // --------------------- ROUTES ---------------------
-``
+
 app.post('/register', validateRegister, saltHashPassword, registerUser);
 
 app.post('/login', validateLogin, verifyUserCredentials);
@@ -84,14 +85,10 @@ app.put('/cart/:id', authenticateToken, validateUpdateCart, checkProductExists, 
 
 app.delete('/cart/:id', authenticateToken, validateProductIdParam, checkProductExists, assertCartItem, deleteCartItem, finalHandler);
 
-app.post('/checkout', authenticateToken, processPayment);
+app.post('/checkout', authenticateToken, addOrderPending, processPayment); // TODO: implement addOrderPending
 
-app.post("/webhook", express.raw({ type: "application/json" }), webhookConfirmation);
+app.post('/webhook', express.raw({ type: "application/json" }), webhookConfirmation); // this route is for Stripe to use when payment status update
 
-app.get('/orders', );
+app.get('/orders', authenticateToken, loadOrders, finalHandler);
 
-
-
-// app.get('/orders', authenticateToken, loadOrders, finalHandler); 
-
-
+// auth, user, product, cart, order, and payment 

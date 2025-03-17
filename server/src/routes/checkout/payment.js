@@ -8,15 +8,18 @@ const stripe = new Stripe(STRIPE_SECRET_KEY);
 
 export const processPayment = async (req, res) => {
     try {
-        const { amount, currency, token } = req.body; // Token comes from the request body
+        const { amount, currency, token, orderId } = req.body; // Order ID passed from addOrderPending
 
         // Create the PaymentIntent with the token (payment method ID)
         const paymentIntent = await stripe.paymentIntents.create({
             amount,
             currency,
-            payment_method: token, // Use the token received from frontend
-            confirmation_method: 'manual',  // Manual confirmation (for 3D Secure, etc.)
+            payment_method: token,
+            confirmation_method: 'manual',
             confirm: true,  // Automatically confirm the payment
+            metadata: {
+                order_id: orderId,  // Attach the order ID to the metadata
+            }
         });
 
         res.json({ clientSecret: paymentIntent.client_secret });  // Send the clientSecret to frontend
@@ -24,6 +27,7 @@ export const processPayment = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 };
+
 
 
 export const webhookConfirmation = (req, res) => {
