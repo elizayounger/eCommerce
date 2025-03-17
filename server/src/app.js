@@ -2,6 +2,15 @@
 import dotenv from 'dotenv';
 import express from 'express';
 import { connectDB } from './config/db.js'; // Import db config settings
+import { Server } from "socket.io";
+
+// --------------------- SERVER SETUP ---------------------
+const PORT =  process.env.SERVER_PORT || 3000; 
+const server = app.listen(PORT, () => {
+   console.log(`Server running on port ${PORT}`);
+});
+const io = new Server(server);
+
 // import pkg from 'cors';
 // const { cors } = pkg;
 // TODO: add cors
@@ -35,6 +44,7 @@ import { checkPreExistingEmail } from './middleware/checkDuplicateEmail.js'; // 
 import { checkProductExists } from './util/productExists.js'; // middleware
 import { assertCartItem } from './util/checkUserCart.js'; // middleware
 import { validateProductIdParam } from './middleware/validateParams.js'; // middleware
+import { processPayment, webhookConfirmation } from '../src/routes/checkout/stripe.js';
 
 import { registerUser } from './routes/register.js';
 import { verifyUserCredentials } from './routes/login.js';
@@ -74,21 +84,14 @@ app.put('/cart/:id', authenticateToken, validateUpdateCart, checkProductExists, 
 
 app.delete('/cart/:id', authenticateToken, validateProductIdParam, checkProductExists, assertCartItem, deleteCartItem, finalHandler);
 
-app.post('/checkout', );
-// {
-//    "paymentMethodId": "pm_123456789",  
-//    "amount": 5000,  
-//    "currency": "USD",
-//    "saveCard": true
-//  }
+app.post('/checkout', authenticateToken, processPayment);
 
-app.get('/orders', authenticateToken, loadOrders, finalHandler); 
+app.post("/webhook", express.raw({ type: "application/json" }), webhookConfirmation);
 
-// --------------------- SERVER SETUP ---------------------
+app.get('/orders', );
 
-const PORT =  process.env.SERVER_PORT || 3000; 
 
-app.listen(PORT, () => {
-   console.log(`Server running on port ${PORT}`);
-});
+
+// app.get('/orders', authenticateToken, loadOrders, finalHandler); 
+
 
