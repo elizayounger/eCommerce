@@ -1,6 +1,34 @@
 import { param, body, validationResult } from 'express-validator';
 import { validateProductIdParam } from './validateParams.js';
 
+export const validateCheckout = [
+   body("amount").isFloat({ min: 0.01, max: 999999.99 }).withMessage("Amount must be a number greater than or equal to 0.01 and up to 2 decimal places.")
+      .custom((value) => { // Ensure value has at most 2 decimal places
+         if (!/^\d+(\.\d{1,2})?$/.test(value)) { 
+            throw new Error("Amount can have up to 2 decimal places.");
+         }
+         return true;
+      }),
+   body("currency").trim().notEmpty().withMessage("3-letter currency is required.")
+      .isLength({ min: 3, max: 3 }).withMessage("Currency must be exactly 3 letters."),
+
+   (req, res, next) => {
+      // const allowedFields = ["amount, currency"];
+
+      // // Check for extra fields
+      // const invalidKeys = Object.keys(req.body).filter(key => !allowedFields.includes(key));
+      // if (invalidKeys.length > 0) {
+      //    return res.status(400).json({ message: `Unrecognized field(s): ${invalidKeys.join(", ")}` });
+      // }
+      // Validate required fields
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+         return res.status(400).json({ errors: errors.array() });
+      }
+      next();
+   }
+];
+
 export const validateUpdateCart = [
    ...validateProductIdParam,
    body("quantity").isInt({ min: 1 }).withMessage("Item quantity must be a positive integer"),

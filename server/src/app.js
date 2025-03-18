@@ -3,8 +3,20 @@ import dotenv from 'dotenv';
 import express from 'express';
 import { connectDB } from './config/db.js'; // Import db config settings
 import { Server } from "socket.io";
+import cors from 'cors';
+import helmet from 'helmet';
 
 // --------------------- SERVER SETUP ---------------------
+
+dotenv.config();
+
+const app = express();
+connectDB(); // connect to database
+
+app.use(express.json());
+app.use(cors());
+app.use(helmet());
+
 const PORT =  process.env.SERVER_PORT || 3000; 
 const server = app.listen(PORT, () => {
    console.log(`Server running on port ${PORT}`);
@@ -19,13 +31,6 @@ const io = new Server(server);
 // TODO: change port number from default
 // TODO: ensure csrf protected
 
-dotenv.config();
-
-const app = express();
-app.use(express.json());
-// app.use(cors());
-connectDB(); // connect to database
-
 // --------------------- IMPORTS ---------------------
 
 import {                                                               // middleware
@@ -36,7 +41,8 @@ import {                                                               // middle
    validateUpdateProduct,
    validateDeleteProduct,
    validateAddToCart,
-   validateUpdateCart
+   validateUpdateCart,
+   validateCheckout
 } from './middleware/validateRequest.js';     
 import { authenticateToken } from './middleware/authenticateToken.js';  // middleware
 import { saltHashPassword } from './middleware/saltHashPassword.js'; // middleware
@@ -85,10 +91,10 @@ app.put('/cart/:id', authenticateToken, validateUpdateCart, checkProductExists, 
 
 app.delete('/cart/:id', authenticateToken, validateProductIdParam, checkProductExists, assertCartItem, deleteCartItem, finalHandler);
 
-app.post('/checkout', authenticateToken, addOrderPending, processPayment); // TODO: implement addOrderPending
+app.post('/checkout', authenticateToken, processPayment, addOrderPending, finalHandler); // TODO: implement addOrderPending
 
 app.post('/webhook', express.raw({ type: "application/json" }), webhookConfirmation); // this route is for Stripe to use when payment status update
 
-app.get('/orders', authenticateToken, loadOrders, finalHandler);
+app.get('/orders', authenticateToken, validateCheckout, loadOrders, finalHandler);
 
 // auth, user, product, cart, order, and payment 

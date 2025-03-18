@@ -55,21 +55,25 @@ DROP TABLE IF EXISTS public."order";
 CREATE TABLE public."order" (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES "user"(id) ON DELETE CASCADE,
-    order_date DATE DEFAULT CURRENT_DATE,
+    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Changed from DATE to TIMESTAMP
     currency VARCHAR(3),
     total_price NUMERIC(10,2) NOT NULL DEFAULT 0.00,
     status VARCHAR CHECK (status IN (
-    'pending',        -- Order is created but not yet paid
-    'succeeded',      -- Payment was successful and order is complete
-    'failed',         -- Payment failed (e.g., due to issues with payment method)
-    'rejected',       -- Payment rejected by user or system
-    'canceled',       -- Order was canceled by the user or system
-    'awaiting_payment',  -- Order is awaiting payment to be initiated
-    'processing',     -- Payment was successful but order is still being processed
-    'partially_paid', -- Order has been partially paid (e.g., deposit)
-    'refunded'        -- Payment was refunded
-    ))
+        'pending',        -- Order is created but not yet paid
+        'succeeded',      -- Payment was successful and order is complete
+        'failed',         -- Payment failed (e.g., due to issues with payment method)
+        'rejected',       -- Payment rejected by user or system
+        'canceled',       -- Order was canceled by the user or system
+        'awaiting_payment',  -- Order is awaiting payment to be initiated
+        'processing',     -- Payment was successful but order is still being processed
+        'partially_paid', -- Order has been partially paid (e.g., deposit)
+        'refunded'        -- Payment was refunded
+    )),
+    transaction_id VARCHAR(255) NOT NULL DEFAULT '', -- Unique transaction reference
+    UNIQUE (transaction_id) -- Ensure transaction_id is unique per order
 );
+
+
 
 -- Order Item Table (Many-to-Many between Order and Product)
 DROP TABLE IF EXISTS public.order_item;

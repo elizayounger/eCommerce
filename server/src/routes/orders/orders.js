@@ -1,27 +1,71 @@
-import { customer_pool } from '../config/db.js';
-import { setAppCurrentUser, resetAppCurrentUser } from '../util/rlsProtectedQuery.js';
+import { customer_pool, employee_pool } from '../../config/db.js';
+import { setAppCurrentUser, resetAppCurrentUser } from '../../util/rlsProtectedQuery.js';
+
+export const updateOrderStatus = async (transaction_id, newStatus) => {
+    try {
+        const params = [newStatus, transaction_id]; 
+        const sqlQuery = `
+            UPDATE public."order"
+            SET status = $1
+            WHERE transaction_id = $2
+            RETURNING id;  -- Return updated row for confirmation
+        `;
+
+        const { rows } = await employee.query(sqlQuery, params);
+
+        if (rows.length > 0) {
+            return rows[0];  // Return the updated order
+        }
+        return null;  // Return null if no row was updated
+        
+    } catch (error) {
+        console.error("Error updating order status:", error);
+        throw error;  // Rethrow for better error handling
+    }
+};
+
 
 export const addOrderPending = async (req, res, next) => {
     try {
         // Assuming you have some logic to create an order, e.g.:
-        const { amount, currency } = req.body;
-        
-        setAppCurrentUser(email);
-        
-        const params = [req.user.id, currency, amount]; 
-        const sqlQuery = `
-            INSERT INTO public."order" (user_id, currency, total_price, status) 
-            VALUES ($1, $2, $3, 'pending');`;
+        let { amount, currency, transaction_id } = req.body;
 
+        amount = parseFloat((amount / 100).toFixed(2)); // Convert currency to a float with two decimals
+        
+        setAppCurrentUser(req.user.email);
+
+        // Set the params for the query
+        const params = [req.user.id, currency, amount, transaction_id]; 
+        
+        // Insert the order into the database
+        const sqlQuery = `
+            INSERT INTO public."order" (user_id, currency, total_price, status, transaction_id) 
+            VALUES ($1, $2, $3, 'pending', $4) 
+            RETURNING id;`;  // Use RETURNING to get the id of the inserted order
+
+        // Execute the query and get the result
         const { rows } = await customer_pool.query(sqlQuery, params);
 
         // Attach the order ID to the request body for the next middleware (processPayment)
-        req.body.orderId = order.id;
-        next();
+        req.body.orderId = rows[0].id; // Access the id from the returned rows
+        
+        // Add success message
+        res.locals.response.order = "Pending order successfully added";
+
+        // Pass control to the next middleware
+        return next();
     } catch (error) {
-        res.status(500).json({ error: 'Failed to create order' });
+        // Handle errors and return a detailed message
+        res.status(500).json({
+            message: 'Failed to create order',
+            error: error.message,
+            user_id: req.user.id,
+            body: req.body
+        });
     }
 };
+
+
 
 
 export const loadOrders = async (req, res, next) => {

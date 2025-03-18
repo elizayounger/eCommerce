@@ -49,12 +49,28 @@ ON public.cart_item
 FOR SELECT
 USING (user_id = (SELECT id FROM public."user" WHERE email = current_setting('app.current_user')::text));
 
-
 -- ORDER
 CREATE ROLE read_order;
 GRANT USAGE, SELECT ON public.order TO read_order;
+create role update_order;
+GRANT INSERT ON public."order" TO update_order;
+CREATE ROLE write_order;
+GRANT USAGE, SELECT ON SEQUENCE public.order_id_seq TO write_order;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.order TO write_order;
 REVOKE ALL ON public.order FROM PUBLIC;
--- TODO: own_order policy
+
+CREATE POLICY select_own_order
+ON public."order"
+FOR SELECT
+USING (user_id = (SELECT id FROM public."user" WHERE email = current_setting('app.current_user')::text));
+
+CREATE POLICY select_all_orders_for_employees
+ON public."order"
+FOR SELECT
+USING (
+    current_setting('app.current_role')::text = 'employee'
+);
+
 
 -- ORDER_ITEM
 CREATE ROLE read_order_item;
@@ -87,6 +103,7 @@ CREATE ROLE employee;
 GRANT use_db TO employee;
 GRANT read_user TO employee;
 GRANT write_product TO employee;
+GRANT update_order TO employee; 
 
 CREATE POLICY select_all_users
 ON public."user"
@@ -100,7 +117,7 @@ GRANT use_db TO customer;
 GRANT write_user TO customer;
 GRANT read_product TO customer;
 GRANT write_cart_item TO customer;
-GRANT read_order TO customer;
+GRANT write_order TO customer; --
 GRANT read_order_item TO customer;
 GRANT read_customer_cart TO customer;
 GRANT read_customer_order TO customer;
