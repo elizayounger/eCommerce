@@ -66,6 +66,38 @@ export const addOrderPending = async (req, res, next) => {
     }
 };
 
+export const loadOrder = async (req, res, next) => {
+    // Assuming the user is already authenticated and user info is available
+    const email = res.locals.user.email;
+    const user_id = req.user.id;
+    const order_id = req.params.id;
+
+    try {
+        // Setting the current user (this function should be implemented elsewhere in the codebase)
+        setAppCurrentUser(email);
+        
+        // Parameterized SQL query to fetch user orders
+        const sqlQuery = `
+            SELECT * FROM public."order"
+            WHERE user_id = $1
+            AND id = $2;`;
+
+        const { rows } = await customer_pool.query(sqlQuery, [user_id, order_id]);
+
+        if (rows.length === 0) {    return res.status(404).json({ error: 'Order ID not found' });   }
+
+        res.locals.response.orders = rows;
+
+        return next();
+        
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Failed to fetch customer order', details: err.message });
+    } finally {
+        resetAppCurrentUser();
+    }
+};
+
 export const loadOrders = async (req, res, next) => {
     // Assuming the user is already authenticated and user info is available
     const email = res.locals.user.email;

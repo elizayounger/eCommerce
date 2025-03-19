@@ -1,5 +1,19 @@
 import { param, body, validationResult } from 'express-validator';
-import { validateProductIdParam } from './validateParams.js';
+import { validateProductIdParam, validateOrderIdParam } from './validateParams.js';
+
+
+export const validateGetOrder = [
+   ...validateOrderIdParam,
+
+   (req, res, next) => {
+      // Validate required fields
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+         return res.status(400).json({ errors: errors.array() });
+      }
+      next();
+   }
+];
 
 export const validateCheckout = [
    body("paymentMethod").trim().notEmpty().withMessage("Payment method is required.")

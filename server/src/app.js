@@ -40,7 +40,8 @@ import {                                                               // middle
    validateDeleteProduct,
    validateAddToCart,
    validateUpdateCart,
-   validateCheckout
+   validateCheckout,
+   validateGetOrder
 } from './middleware/validateRequest.js';     
 import { authenticateToken } from './middleware/authenticateToken.js';  // middleware
 import { saltHashPassword } from './middleware/saltHashPassword.js'; // middleware
@@ -55,7 +56,7 @@ import { verifyUserCredentials } from './routes/login.js';
 import { getProfile, updateProfile, deleteProfile } from './routes/profile.js';
 import { loadProduct, loadProducts, addProduct, updateProduct, deleteProduct } from './routes/products.js';
 import { loadCart, addToCart, updateCart, deleteCartItem } from './routes/cart.js';
-import { addOrderPending, loadOrders } from './routes/orders/orders.js';
+import { addOrderPending, loadOrders, loadOrder } from './routes/orders/orders.js';
 import { finalHandler } from './util/finalHandler.js';
 
 
@@ -65,11 +66,15 @@ app.post('/register', express.json(), validateRegister, saltHashPassword, regist
 
 app.post('/login', express.json(), validateLogin, verifyUserCredentials);
 
+// ------                PROFILE                 -----
+
 app.get('/profile', express.json(), authenticateToken, getProfile); 
 
 app.put('/profile', express.json(), authenticateToken, checkPreExistingEmail, validateProfile, saltHashPassword, updateProfile); 
 
 app.delete('/profile', express.json(), authenticateToken, validateLogin, deleteProfile); 
+
+// ------                PRODUCTS                 -----
 
 app.get('/products/:id', express.json(), validateProductIdParam, loadProduct);
 
@@ -81,6 +86,8 @@ app.put('/products/:id', express.json(), authenticateToken, validateUpdateProduc
 
 app.delete('/products/:id', express.json(), authenticateToken, validateDeleteProduct, checkProductExists, deleteProduct, finalHandler); 
 
+// ------                 CART                  -----
+
 app.get('/cart', express.json(), authenticateToken, loadCart, finalHandler); 
 
 app.post('/cart', express.json(), authenticateToken, validateAddToCart, checkProductExists, addToCart, finalHandler);
@@ -89,10 +96,16 @@ app.put('/cart/:id', express.json(), authenticateToken, validateUpdateCart, chec
 
 app.delete('/cart/:id', express.json(), authenticateToken, validateProductIdParam, checkProductExists, assertCartItem, deleteCartItem, finalHandler);
 
+// ------                CHECKOUT                 -----
+
 app.post('/checkout', express.json(), authenticateToken, validateCheckout, processPayment, addOrderPending, finalHandler); 
 
 app.post('/webhook', express.raw({ type: "application/json" }), webhookConfirmation); // this route is for Stripe to use when payment status update
 
+// ------                ORDERS                 -----
+
 app.get('/orders', express.json(), authenticateToken, loadOrders, finalHandler);
+
+app.get('/orders/:id', express.json(), authenticateToken, validateGetOrder, loadOrder, finalHandler);
 
 // auth, user, product, cart, order, and payment 

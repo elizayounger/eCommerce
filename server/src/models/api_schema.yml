@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: An e-commerce application REST API
 paths:
-  /:
+  /orders:
     summary: List of items for purchase
     get:
       summary: Retrieve the list of products being sold on the site.
@@ -175,7 +175,7 @@ paths:
           description: Internal server error
       tags:
         - login
-  /account:
+  /profile:
     summary: Retrieve user account details
     get:
       summary: Get user account details
