@@ -11,7 +11,7 @@ export const updateOrderStatus = async (transaction_id, newStatus) => {
             RETURNING id;  -- Return updated row for confirmation
         `;
 
-        const { rows } = await employee.query(sqlQuery, params);
+        const { rows } = await employee_pool.query(sqlQuery, params);
 
         if (rows.length > 0) {
             return rows[0];  // Return the updated order
@@ -54,6 +54,7 @@ export const addOrderPending = async (req, res, next) => {
 
         // Pass control to the next middleware
         return next();
+
     } catch (error) {
         // Handle errors and return a detailed message
         res.status(500).json({
@@ -64,9 +65,6 @@ export const addOrderPending = async (req, res, next) => {
         });
     }
 };
-
-
-
 
 export const loadOrders = async (req, res, next) => {
     // middleware has already: authenticated token,

@@ -13,7 +13,7 @@ dotenv.config();
 const app = express();
 connectDB(); // connect to database
 
-app.use(express.json());
+// app.use(express.json());
 app.use(cors());
 app.use(helmet());
 
@@ -22,11 +22,9 @@ const server = app.listen(PORT, () => {
    console.log(`Server running on port ${PORT}`);
 });
 const io = new Server(server);
+// Export io to make it accessible in other files
+export { io };
 
-// import pkg from 'cors';
-// const { cors } = pkg;
-// TODO: add cors
-// TODO: add helmet
 // TODO: add config.db controlling who db accepts connection requests from 
 // TODO: change port number from default
 // TODO: ensure csrf protected
@@ -63,38 +61,38 @@ import { finalHandler } from './util/finalHandler.js';
 
 // --------------------- ROUTES ---------------------
 
-app.post('/register', validateRegister, saltHashPassword, registerUser);
+app.post('/register', express.json(), validateRegister, saltHashPassword, registerUser);
 
-app.post('/login', validateLogin, verifyUserCredentials);
+app.post('/login', express.json(), validateLogin, verifyUserCredentials);
 
-app.get('/profile', authenticateToken, getProfile); 
+app.get('/profile', express.json(), authenticateToken, getProfile); 
 
-app.put('/profile', authenticateToken, checkPreExistingEmail, validateProfile, saltHashPassword, updateProfile); 
+app.put('/profile', express.json(), authenticateToken, checkPreExistingEmail, validateProfile, saltHashPassword, updateProfile); 
 
-app.delete('/profile', authenticateToken, validateLogin, deleteProfile); 
+app.delete('/profile', express.json(), authenticateToken, validateLogin, deleteProfile); 
 
-app.get('/products/:id', validateProductIdParam, loadProduct);
+app.get('/products/:id', express.json(), validateProductIdParam, loadProduct);
 
-app.get('/products', loadProducts);
+app.get('/products', express.json(), loadProducts);
 
-app.post('/products', authenticateToken, validateAddProduct, addProduct, finalHandler);
+app.post('/products', express.json(), authenticateToken, validateAddProduct, addProduct, finalHandler);
 
-app.put('/products/:id', authenticateToken, validateUpdateProduct, checkProductExists, updateProduct, finalHandler); 
+app.put('/products/:id', express.json(), authenticateToken, validateUpdateProduct, checkProductExists, updateProduct, finalHandler); 
 
-app.delete('/products/:id', authenticateToken, validateDeleteProduct, checkProductExists, deleteProduct, finalHandler); 
+app.delete('/products/:id', express.json(), authenticateToken, validateDeleteProduct, checkProductExists, deleteProduct, finalHandler); 
 
-app.get('/cart', authenticateToken, loadCart, finalHandler); 
+app.get('/cart', express.json(), authenticateToken, loadCart, finalHandler); 
 
-app.post('/cart', authenticateToken, validateAddToCart, checkProductExists, addToCart, finalHandler);
+app.post('/cart', express.json(), authenticateToken, validateAddToCart, checkProductExists, addToCart, finalHandler);
 
-app.put('/cart/:id', authenticateToken, validateUpdateCart, checkProductExists, assertCartItem, updateCart, finalHandler);
+app.put('/cart/:id', express.json(), authenticateToken, validateUpdateCart, checkProductExists, assertCartItem, updateCart, finalHandler);
 
-app.delete('/cart/:id', authenticateToken, validateProductIdParam, checkProductExists, assertCartItem, deleteCartItem, finalHandler);
+app.delete('/cart/:id', express.json(), authenticateToken, validateProductIdParam, checkProductExists, assertCartItem, deleteCartItem, finalHandler);
 
-app.post('/checkout', authenticateToken, processPayment, addOrderPending, finalHandler); // TODO: implement addOrderPending
+app.post('/checkout', express.json(), authenticateToken, processPayment, addOrderPending, finalHandler); 
 
 app.post('/webhook', express.raw({ type: "application/json" }), webhookConfirmation); // this route is for Stripe to use when payment status update
 
-app.get('/orders', authenticateToken, validateCheckout, loadOrders, finalHandler);
+app.get('/orders', express.json(), authenticateToken, validateCheckout, loadOrders, finalHandler);
 
 // auth, user, product, cart, order, and payment 

@@ -1,6 +1,7 @@
 import Stripe from 'stripe';
 import dotenv from 'dotenv';
 import { updateOrderStatus } from "../orders/orders.js";
+import { io } from "../../app.js"; 
 
 dotenv.config();
 
@@ -24,7 +25,10 @@ export const processPayment = async (req, res, next) => {
         });
 
         req.body.transaction_id = paymentIntent.id;
-        res.locals.response.clientSecret = paymentIntent.client_secret;
+        res.locals.response.paymentIntent = paymentIntent;
+        // res.locals.response.clientSecret = paymentIntent.client_secret;
+        // res.locals.response.status = paymentIntent.status;
+        // frontend: if (status === "requires_action") {}
         
         return next();
 
@@ -40,24 +44,23 @@ export const webhookConfirmation = async (req, res) => {
         // Verify the webhook signature to ensure it's from Stripe
         const event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
 
-        // Check for successful payment event
-        if (event.type === "payment_intent.succeeded") {
-            console.log("✅ Payment was successful!", event.data.object);
+        const status = event.data.object.status; 
+        const transactionId = event.data.object.payment_intent;
+        console.log(event)
+        
+        console.log(`Payment was ${status}`, event.data.object);
 
-            const transactionId = event.data.object.id;
+        const updatedOrder = await updateOrderStatus(transactionId, status);
 
-            const updatedOrder = await updateOrderStatus(transactionId, "succeeded");
-
-            if (updatedOrder) {
-                console.log(`🎉 Order with transaction ID ${transactionId} updated to 'succeeded'`);
-                
-                io.emit("paymentSuccess", {
-                    message: "Payment successful!",
-                    paymentId: transactionId,
-                });
-            } else {
-                console.warn(`⚠️ No order found for transaction ID: ${transactionId}`);
-            }
+        if (updatedOrder) {
+            console.log(`Order with transaction ID ${transactionId} updated to ${status}`);
+            
+            io.emit(`payment${status}`, {
+                message: `payment${status}`,
+                paymentId: transactionId,
+            });
+        } else {
+            console.warn(`⚠️ No order found for transaction ID: ${transactionId}`);
         }
         res.json({ received: true });
     } catch (err) {
