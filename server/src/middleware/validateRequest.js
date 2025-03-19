@@ -2,6 +2,8 @@ import { param, body, validationResult } from 'express-validator';
 import { validateProductIdParam } from './validateParams.js';
 
 export const validateCheckout = [
+   body("paymentMethod").trim().notEmpty().withMessage("Payment method is required.")
+      .isString().withMessage("Payment method must be a string."),
    body("amount").isFloat({ min: 0.01, max: 999999.99 }).withMessage("Amount must be a number greater than or equal to 0.01 and up to 2 decimal places.")
       .custom((value) => { // Ensure value has at most 2 decimal places
          if (!/^\d+(\.\d{1,2})?$/.test(value)) { 

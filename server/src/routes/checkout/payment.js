@@ -46,9 +46,9 @@ export const webhookConfirmation = async (req, res) => {
 
         const status = event.data.object.status; 
         const transactionId = event.data.object.payment_intent;
-        console.log(event)
+        // console.log(event)
         
-        console.log(`Payment was ${status}`, event.data.object);
+        // console.log(`Payment was ${status}`, event.data.object);
 
         const updatedOrder = await updateOrderStatus(transactionId, status);
 

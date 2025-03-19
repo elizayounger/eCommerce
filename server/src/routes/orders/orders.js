@@ -67,33 +67,33 @@ export const addOrderPending = async (req, res, next) => {
 };
 
 export const loadOrders = async (req, res, next) => {
-    // middleware has already: authenticated token,
+    // Assuming the user is already authenticated and user info is available
     const email = res.locals.user.email;
     const user_id = req.user.id;
-    const product_id = req.params.id;
 
     try {
+        // Setting the current user (this function should be implemented elsewhere in the codebase)
         setAppCurrentUser(email);
         
-        const params = [user_id, product_id]; 
+        // Parameterized SQL query to fetch user orders
         const sqlQuery = `
-            SELECT * FROM public."order";`;
+            SELECT * FROM public."order"
+            WHERE user_id = $1;`;
 
-        const { rows } = await customer_pool.query(sqlQuery, params);
+        const { rows } = await customer_pool.query(sqlQuery, [user_id]);
 
-        if (!rows.length > 0) {   return res.json({message: `Unsuccessful deletion from cart`})  }
-        
-        res.locals.response.cart = rows;
+        res.locals.response.orders = rows;
 
         return next();
-
+        
     } catch (err) {
         console.error(err);
-        return res.status(500).json({ error: 'Failed to delete from cart', details: err.message });
+        return res.status(500).json({ error: 'Failed to fetch customer orders', details: err.message });
     } finally {
         resetAppCurrentUser();
     }
 };
+
 
 export const addOrder = async (req, res, next) => {
     // middleware has already: authenticated token,
