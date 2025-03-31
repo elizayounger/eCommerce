@@ -53,12 +53,16 @@ export const webhookConfirmation = async (req, res) => {
 
         const status = event.data.object.status; 
         const transactionId = event.data.object.payment_intent;
-        // console.log(event)
-        
-        // console.log(`Payment was ${status}`, event.data.object);
 
         const updatedOrder = await updateOrderStatus(transactionId, status);
         const clearCart = await clearCart(updatedOrder.user_id);
+        if (!clearCart) {
+            console.log(`Failed to clear cart for user ${updatedOrder.user_id}`);
+            
+            io.emit(`clear user ${updatedOrder.user_id} cart unsuccessful`, {
+                message: `user${updatedOrder.user_id}`
+            });
+        }
 
         if (updatedOrder) {
             console.log(`Order with transaction ID ${transactionId} updated to ${status}`);

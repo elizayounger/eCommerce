@@ -8,10 +8,13 @@ export const clearCart = async (user_id) =>  {
             DELETE FROM public.cart_item 
             WHERE user_id = $1;`;
         
-        const { rows } = employee_pool.query(sqlQuery, [user_id])
+        const { rows } = employee_pool.query(sqlQuery, [user_id]);
+
+        return rows;
 
     } catch (error) {
         console.error('Clear cart unsuccessful');
+        return null;
     }
 }
 
