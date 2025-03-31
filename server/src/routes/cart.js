@@ -143,6 +143,7 @@ export const loadCart = async (req, res, next) => {
         if (!rows.length > 0) {   return res.json({message: `No items in user cart`})  }
         
         res.locals.response.cart = rows;
+        req.user.cart = rows;
 
         return next();
 

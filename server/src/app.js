@@ -98,7 +98,7 @@ app.delete('/cart/:id', express.json(), authenticateToken, validateProductIdPara
 
 // ------                CHECKOUT                 -----
 
-app.post('/checkout', express.json(), authenticateToken, validateCheckout, processPayment, addOrderPending, finalHandler); 
+app.post('/checkout', express.json(), authenticateToken, validateCheckout, processPayment, loadCart, addOrderPending, finalHandler); 
 
 app.post('/webhook', express.raw({ type: "application/json" }), webhookConfirmation); // this route is for Stripe to use when payment status update
 

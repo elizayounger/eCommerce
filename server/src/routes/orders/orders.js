@@ -24,6 +24,16 @@ export const updateOrderStatus = async (transaction_id, newStatus) => {
     }
 };
 
+export const addOrderItems = async (req, res, next) => {
+    try {
+        const items = req.user.cart;
+        
+    } catch (error) {
+        console.error('Error adding order items:', error);
+        throw error;
+    }
+}
+
 
 export const addOrderPending = async (req, res, next) => {
     try {
