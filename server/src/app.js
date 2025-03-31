@@ -56,7 +56,7 @@ import { verifyUserCredentials } from './routes/login.js';
 import { getProfile, updateProfile, deleteProfile } from './routes/profile.js';
 import { loadProduct, loadProducts, addProduct, updateProduct, deleteProduct } from './routes/products.js';
 import { loadCart, addToCart, updateCart, deleteCartItem } from './routes/cart.js';
-import { addOrderPending, loadOrders, loadOrder } from './routes/orders/orders.js';
+import { addOrderPending, addOrderItems, loadOrders, loadOrder } from './routes/orders/orders.js';
 import { finalHandler } from './util/finalHandler.js';
 
 
@@ -98,9 +98,9 @@ app.delete('/cart/:id', express.json(), authenticateToken, validateProductIdPara
 
 // ------                CHECKOUT                 -----
 
-app.post('/checkout', express.json(), authenticateToken, validateCheckout, processPayment, loadCart, addOrderPending, finalHandler); 
+app.post('/checkout', express.json(), authenticateToken, validateCheckout, loadCart, processPayment, addOrderPending, addOrderItems, finalHandler); 
 
-app.post('/webhook', express.raw({ type: "application/json" }), webhookConfirmation); // this route is for Stripe to use when payment status update
+app.post('/webhook', express.raw({ type: "application/json" }), webhookConfirmation, ); // this route is for Stripe to use when payment status update
 
 // ------                ORDERS                 -----
 

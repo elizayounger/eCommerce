@@ -1,6 +1,7 @@
 import Stripe from 'stripe';
 import dotenv from 'dotenv';
 import { updateOrderStatus } from "../orders/orders.js";
+import { clearCart } from "../cart.js";
 import { io } from "../../app.js"; 
 
 dotenv.config();
@@ -11,6 +12,12 @@ const stripe = new Stripe(STRIPE_SECRET_KEY);
 export const processPayment = async (req, res, next) => {
     try {
         const { amount, currency, paymentMethod } = req.body; // Order ID passed from addOrderPending
+
+        const items = req.user.cart;
+        if (!items || items.length < 1) {
+            console.log(`Empty cart for user: ${req.user.id}`);
+            return res.status(400).json({ message: `cart empty, nothing to purchase` });
+        }
 
         // Create the PaymentIntent with the token (payment method ID)
         const paymentIntent = await stripe.paymentIntents.create({
@@ -51,6 +58,7 @@ export const webhookConfirmation = async (req, res) => {
         // console.log(`Payment was ${status}`, event.data.object);
 
         const updatedOrder = await updateOrderStatus(transactionId, status);
+        const clearCart = await clearCart(updatedOrder.user_id);
 
         if (updatedOrder) {
             console.log(`Order with transaction ID ${transactionId} updated to ${status}`);

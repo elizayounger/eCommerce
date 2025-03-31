@@ -26,11 +26,35 @@ export const updateOrderStatus = async (transaction_id, newStatus) => {
 
 export const addOrderItems = async (req, res, next) => {
     try {
-        const items = req.user.cart;
-        
+        // already checked token, request body, fetched cart, generated payment_intent
+        const items = req.user.cart; // already been checked to make sure cart not empty
+        const email = req.user.email;
+        const order_id = req.body.orderId;
+        setAppCurrentUser(email);
+
+        const itemsArray = items.map(item => [order_id, item.product_id, item.quantity]);
+
+        const sqlQuery = `
+            INSERT INTO public.order_item (order_id, product_id, quantity)
+            SELECT * FROM UNNEST ($1::integer[], $2::integer[], $3::integer[])`;
+
+        const params = [
+            itemsArray.map(item => item[0]), // order_id array
+            itemsArray.map(item => item[1]), // product_id array
+            itemsArray.map(item => item[2])  // quantity array
+        ];
+
+        const { rows } = await customer_pool.query(sqlQuery, params);
+
+        // res.locals.response.order_items = rows;
+
+        return next();
+
     } catch (error) {
         console.error('Error adding order items:', error);
         throw error;
+    } finally {
+        resetAppCurrentUser();
     }
 }
 

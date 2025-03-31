@@ -1,6 +1,19 @@
-import { customer_pool } from '../config/db.js';
+import { customer_pool, employee_pool } from '../config/db.js';
 import { setAppCurrentUser, resetAppCurrentUser } from '../util/rlsProtectedQuery.js';
 import { sufficientStock } from '../util/sufficientStock.js';
+
+export const clearCart = async (user_id) =>  {
+    try { 
+        const sqlQuery = `
+            DELETE FROM public.cart_item 
+            WHERE user_id = $1;`;
+        
+        const { rows } = employee_pool.query(sqlQuery, [user_id])
+
+    } catch (error) {
+        console.error('Clear cart unsuccessful');
+    }
+}
 
 export const deleteCartItem = async (req, res, next) => {
     // middleware has already: authenticated token, fetched user and saved in req.user, initialised res.locals.response
