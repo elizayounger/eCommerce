@@ -13,6 +13,8 @@ export const updateOrderStatus = async (transaction_id, newStatus) => {
 
         const { rows } = await employee_pool.query(sqlQuery, params);
 
+        console.log(`rows returned from update order status: ${JSON.stringify(rows)}`);
+
         if (rows.length > 0) {
             return rows[0];  // Return the updated order
         }

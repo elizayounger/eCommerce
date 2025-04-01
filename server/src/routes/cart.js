@@ -2,21 +2,27 @@ import { customer_pool, employee_pool } from '../config/db.js';
 import { setAppCurrentUser, resetAppCurrentUser } from '../util/rlsProtectedQuery.js';
 import { sufficientStock } from '../util/sufficientStock.js';
 
-export const clearCart = async (user_id) =>  {
-    try { 
+
+export const clearCart = async (user_id) => {
+    try {
         const sqlQuery = `
             DELETE FROM public.cart_item 
             WHERE user_id = $1;`;
         
-        const { rows } = employee_pool.query(sqlQuery, [user_id]);
+        const rows = await employee_pool.query(sqlQuery, [user_id]);
 
-        return rows;
+        console.log(`clearCart sql Response rows: ${JSON.stringify(rows)}`);
 
+        if (rows.rows.length > 0) {
+            return rows[0]; 
+        }
+        return null;  // Return null if no row was updated
+        
     } catch (error) {
-        console.error('Clear cart unsuccessful');
-        return null;
+        console.error("Error clearing cart:", error);
+        throw error;  // Rethrow for better error handling
     }
-}
+};
 
 export const deleteCartItem = async (req, res, next) => {
     // middleware has already: authenticated token, fetched user and saved in req.user, initialised res.locals.response
@@ -121,7 +127,7 @@ export const addToCart = async (req, res, next) => {
         
         const rows = await customer_pool.query(sqlQuery, params);
 
-        console.log(rows);
+        // console.log(rows);
 
         if (!rows.rowCount > 0) {   return res.status(400).json({message: `Failed to add item to cart`})  }
         
