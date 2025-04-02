@@ -11,10 +11,11 @@ export const clearCart = async (user_id) => {
         
         const rows = await employee_pool.query(sqlQuery, [user_id]);
 
-        console.log(`clearCart sql Response rows: ${JSON.stringify(rows)}`);
+        // console.log(`clearCart sql Response rows: ${JSON.stringify(rows)}`);
 
-        if (rows.rows.length > 0) {
-            return rows[0]; 
+        if (rows.rowCount > 0) {
+            console.log(`rowcount: ${rows.rowCount}`);
+            return rows; 
         }
         return null;  // Return null if no row was updated
         

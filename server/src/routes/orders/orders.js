@@ -11,11 +11,11 @@ export const updateOrderStatus = async (transaction_id, newStatus) => {
             RETURNING id;  -- Return updated row for confirmation
         `;
 
-        const { rows } = await employee_pool.query(sqlQuery, params);
+        const rows = await employee_pool.query(sqlQuery, params);
 
         console.log(`rows returned from update order status: ${JSON.stringify(rows)}`);
 
-        if (rows.length > 0) {
+        if (rows.rowCount > 0) {
             return rows[0];  // Return the updated order
         }
         return null;  // Return null if no row was updated

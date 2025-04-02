@@ -57,10 +57,18 @@ export const webhookConfirmation = async (req, res) => {
         // Verify the webhook signature to ensure it's from Stripe
         const event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
 
-        res.json({ received: true });
+        console.log(`event type: ${event.type}`);
 
-        const status = event.data.object.status; 
-        const user_id = event.data.object.metadata.userId;
+        if (event.type !== "payment_intent.succeeded") {
+            return res.status(200).json({ received: true });
+        }
+
+        // Respond to Stripe first to prevent retries
+        res.status(200).json({ received: true });
+        // charge.succeeded, payment_intent.succeeded, payment_intent.created, charge.updated
+
+        const status = event.data.object.status;
+        const user_id = event.data.object.metadata?.userId;
         const transactionId = event.data.object.payment_intent;
         // console.log(`event: ${JSON.stringify(event)}`);
 
@@ -90,13 +98,10 @@ export const webhookConfirmation = async (req, res) => {
     }
 };
 
-// --------------   NGROK SETUP    --------------
+// --------------   WEBHOOK SETUP    -------------- 
 // terminal: stripe login
-// terminal: ngrok http 3000
-// this will generate a public url: Forwarding https://random-name.ngrok.io -> http://localhost:3000
 // terminal: stripe listen --forward-to localhost:3000/webhook
 // copy the webhook signing secret into the .env STRIPE_WEBHOOK_SECRET
-
 
 // https://dashboard.stripe.com/test/workbench/webhooks
 // https://docs.stripe.com/webhooks : if you're stuck
